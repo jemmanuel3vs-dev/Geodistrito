@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    GeoDistrito
+  </title>
+
+    <!-- LEAFLET -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet/dist/leaflet.css"
+    >
+
+  <!-- CSS -->
+  <link
+    rel="stylesheet"
+    href="styles/styles.css"
+  >
+
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- HEADER -->
+    <header class="topbar">
+
+        <h1>
+          GeoDistrito
+        </h1>
+
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-grid">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <!-- FORMULARIO -->
+            <section class="card">
+
+                <h2>
+                  Registrar Punto
+                </h2>
+
+                <!-- TIPO -->
+                <select id="pointType">
+
+                    <option value="bardas">
+                      Bardas
+                    </option>
+
+                    <option value="lonas">
+                      Lonas
+                    </option>
+
+                    <option value="comites">
+                      Comités
+                    </option>
+
+                    <option value="casillas">
+                      Casillas
+                    </option>
+
+                </select>
+
+                <!-- URL -->
+                <input
+                    type="text"
+                    id="imageUrl"
+                    placeholder="URL de imagen"
+                >
+
+                <!-- IMAGEN -->
+                <input
+                    type="file"
+                    id="imageUpload"
+                    accept="image/*"
+                >
+
+                <!-- PREVIEW -->
+                <img
+                    id="imagePreview"
+                    style="
+                      width:100%;
+                      display:none;
+                      border-radius:12px;
+                      margin-top:10px;
+                    "
+                >
+
+                <!-- LINK MAPS -->
+                <input
+                    type="text"
+                    id="locationLink"
+                    placeholder="Link Google Maps"
+                >
+
+                <!-- BOTÓN LINK -->
+                <button id="btnLoadLink">
+
+                    Cargar ubicación desde link
+
+                </button>
+
+                <!-- CAMPOS COMITÉS -->
+                <div
+                  id="committeeFields"
+                  style="display:none;"
+                >
+
+                    <input
+                        type="text"
+                        id="encargado"
+                        placeholder="Encargado"
+                    >
+
+                </div>
+
+                <!-- UBICACIÓN -->
+                <div class="location-data">
+
+                    <p>
+                      <strong>Latitud:</strong>
+                      <span id="lat">-</span>
+                    </p>
+
+                    <p>
+                      <strong>Longitud:</strong>
+                      <span id="lng">-</span>
+                    </p>
+
+                    <p>
+                      <strong>Distrito:</strong>
+                      <span id="nearest-district">-</span>
+                    </p>
+
+                    <p>
+                      <strong>Sección:</strong>
+                      <span id="nearest-section">-</span>
+                    </p>
+
+                    <p>
+                      <strong>Calle:</strong>
+                      <span id="street">-</span>
+                    </p>
+
+                    <p>
+                      <strong>Colonia:</strong>
+                      <span id="neighborhood">-</span>
+                    </p>
+
+                    <p>
+                      <strong>Municipio:</strong>
+                      <span id="municipio">-</span>
+                    </p>
+
+                </div>
+
+                <!-- BOTONES -->
+                <button id="btnLocate">
+
+                    Encontrar ubicación
+
+                </button>
+
+                <button id="btnSave">
+
+                    Guardar punto
+
+                </button>
+
+            </section>
+
+            <!-- FILTROS -->
+            <section class="card">
+
+                <h2>
+                  Filtros
+                </h2>
+
+                <!-- TIPO -->
+                <select id="filterType">
+
+                    <option value="all">
+                      Todos
+                    </option>
+
+                    <option value="bardas">
+                      Bardas
+                    </option>
+
+                    <option value="lonas">
+                      Lonas
+                    </option>
+
+                    <option value="comites">
+                      Comités
+                    </option>
+
+                    <option value="casillas">
+                      Casillas
+                    </option>
+
+                </select>
+
+                <!-- DISTRITO -->
+                <input
+                    type="text"
+                    id="filterDistrict"
+                    placeholder="Distrito"
+                >
+
+                <!-- SECCIÓN -->
+                <input
+                    type="text"
+                    id="filterSection"
+                    placeholder="Sección"
+                >
+
+                <!-- MUNICIPIO -->
+                <input
+                    type="text"
+                    id="filterMunicipio"
+                    placeholder="Municipio"
+                >
+
+                <!-- ENCARGADO -->
+                <input
+                    type="text"
+                    id="filterEncargado"
+                    placeholder="Encargado"
+                >
+
+                <!-- BOTÓN -->
+                <button id="btnApplyFilters">
+
+                    Aplicar filtros
+
+                </button>
+
+                <button id="btnClearFilters">
+
+                Limpiar filtros
+
+                </button>
+
+            </section>
+
+        </aside>
+
+        <!-- MAPA -->
+        <section class="map-section">
+
+            <div id="map"></div>
+
+        </section>
+
+    </main>
+
+    <!-- TABLA -->
+    <section class="table-section card">
+
+        <div class="table-header">
+
+            <h2>
+              Registros
+            </h2>
+
+            <button id="btnExport">
+
+                Exportar Excel
+
+            </button>
+
+        </div>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                      Tipo
+                    </th>
+
+                    <th>
+                      Distrito
+                    </th>
+
+                    <th>
+                      Sección
+                    </th>
+
+                    <th>
+                      Municipio
+                    </th>
+
+                    <th>
+                      Calle
+                    </th>
+
+                    <th>
+                      Colonia
+                    </th>
+
+                    <th>
+                      Encargado
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="pointsBody">
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+</div>
+
+<!-- LIBRERÍAS -->
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- JS -->
+
+<script src="js/state.js"></script>
+
+<script src="js/map.js"></script>
+
+<script src="js/sections.js"></script>
+
+<script src="js/api.js"></script>
+
+<script src="js/filters.js"></script>
+
+<script src="js/excel.js"></script>
+
+<script src="js/ui.js"></script>
+
+<script src="js/app.js"></script>
+
+</body>
+
+</html>
