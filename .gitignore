@@ -1,0 +1,24 @@
+# Dependencias
+backend/node_modules/
+frontend/node_modules/
+
+# Archivos de entorno
+backend/.env
+frontend/.env
+*.env
+
+# Build y compilados
+backend/dist/
+backend/build/
+frontend/dist/
+frontend/build/
+
+# Archivos temporales
+.DS_Store
+*.log
+Thumbs.db
+
+# Otros
+backend/uploads/*.jpg
+backend/uploads/*.png
+# (mantén esta línea solo si NO quieres subir las imágenes)
