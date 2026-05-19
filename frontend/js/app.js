@@ -1,11 +1,5 @@
-/* ======================================================
-   APP.JS
-   CONTROL PRINCIPAL DE LA APLICACIÓN
-====================================================== */
 
-/* ======================================================
-   ELEMENTOS DOM
-====================================================== */
+/* ELEMENTOS DOM */
 
 const latEl =
 document.getElementById('lat');
@@ -87,90 +81,125 @@ document.getElementById('filterMunicipio');
 const filterEncargado =
 document.getElementById('filterEncargado');
 
-/* ======================================================
-   EVENTOS INICIALES
-====================================================== */
+/*  EVENTOS INICIALES */
 
 document.addEventListener(
   'DOMContentLoaded',
-  () => {
+  async () => {
 
-    initMap();
+    const mapContainer = document.getElementById('map');
 
-    initUserLocation();
-
-    initLayers();
-
-    loadSections();
+    if (mapContainer) {
+      initMap();
+      initUserLocation();
+      initLayers();
+      await loadSections();
+    }
 
     setupUI();
-
     setupEvents();
 
-    fetchPoints();
-
+    await loadSavedPoints();
 
   }
 );
 
-/* ======================================================
-   CONFIGURAR EVENTOS
-====================================================== */
+/* CONFIGURAR EVENTOS */
 
 function setupEvents() {
 
   /* UBICACIÓN */
 
-  btnLocate.addEventListener(
-    'click',
-    locateUser
-  );
+  if (btnLocate) {
+    btnLocate.addEventListener(
+      'click',
+      locateUser
+    );
+  }
 
-  btnLoadLink.addEventListener(
-    'click',
-    locateFromLink
-  );
+  if (btnLoadLink) {
+    btnLoadLink.addEventListener(
+      'click',
+      locateFromLink
+    );
+  }
 
   /* GUARDAR */
 
-  btnSave.addEventListener(
-    'click',
-    savePoint
-  );
+  if (btnSave) {
+    btnSave.addEventListener(
+      'click',
+      savePoint
+    );
+  }
 
   /* EXPORTAR */
 
-  btnExport.addEventListener(
-    'click',
-    exportToExcel
-  );
+  const btnExportExcel = document.getElementById('btnExportExcel');
+  const btnExportCsv = document.getElementById('btnExportCsv');
+  const btnExportGeoJson = document.getElementById('btnExportGeoJson');
+
+  if (btnExportExcel) {
+    btnExportExcel.addEventListener(
+      'click',
+      exportToExcel
+    );
+  }
+
+  if (btnExportCsv) {
+    btnExportCsv.addEventListener('click', exportToCsv);
+  }
+
+  if (btnExportGeoJson) {
+    btnExportGeoJson.addEventListener('click', exportToGeoJSON);
+  }
 
   /* FILTROS */
 
-  btnApplyFilters.addEventListener(
-    'click',
-    applyFilters
-  );
+  if (btnApplyFilters) {
+    btnApplyFilters.addEventListener(
+      'click',
+      applyFilters
+    );
+  }
+
+  if (btnClearFilters) {
+    btnClearFilters.addEventListener(
+      'click',
+      resetFilters
+    );
+  }
 
   /* IMAGEN PREVIEW */
 
-  imageUpload.addEventListener(
-    'change',
-    handleImagePreview
-  );
+  if (imageUpload) {
+    imageUpload.addEventListener(
+      'change',
+      handleImagePreview
+    );
+  }
 
   /* TIPO DE PUNTO */
 
-  pointType.addEventListener(
-    'change',
-    toggleCommitteeFields
-  );
+  if (pointType) {
+    pointType.addEventListener(
+      'change',
+      toggleCommitteeFields
+    );
+  }
+
+  /* TABLA DE REGISTROS */
+
+  if (pointsBody) {
+    pointsBody.addEventListener(
+      'click',
+      handlePointsTableClick
+    );
+  }
 
 }
 
-/* ======================================================
-   PREVIEW DE IMAGEN
-====================================================== */
+/*  PREVIEW DE IMAGEN */
 
 function handleImagePreview(event) {
 
@@ -238,9 +267,7 @@ function handleImagePreview(event) {
 
 }
 
-/* ======================================================
-   MOSTRAR CAMPOS DE COMITÉ
-====================================================== */
+/* MOSTRAR CAMPOS DE COMITÉ*/
 
 function toggleCommitteeFields() {
 
@@ -318,18 +345,14 @@ function locateUser() {
 
 }
 
-/* ======================================================
-   EXTRAER COORDENADAS
-====================================================== */
+/*  EXTRAER COORDENADAS*/
 
 function extractCoordinatesFromGoogleMapsLink(link){
 
   try{
 
-    /* =========================
-       FORMATO:
-       @23.2549674,-106.3815544
-    ========================= */
+    /*  FORMATO:
+       @23.2549674,-106.3815544 */
 
     let match = link.match(
       /@(-?\d+\.\d+),(-?\d+\.\d+)/
@@ -346,10 +369,8 @@ function extractCoordinatesFromGoogleMapsLink(link){
 
     }
 
-    /* =========================
-       FORMATO:
-       !3d23.2553333!4d-106.3810833
-    ========================= */
+    /* FORMATO:
+       !3d23.2553333!4d-106.3810833*/
 
     match = link.match(
       /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/
@@ -378,9 +399,7 @@ function extractCoordinatesFromGoogleMapsLink(link){
 
 }
 
-/* ======================================================
-   UBICACIÓN DESDE LINK
-====================================================== */
+/* UBICACIÓN DESDE LINK */
 
 async function locateFromLink(){
 
@@ -428,11 +447,15 @@ async function locateFromLink(){
 
 }
 
-/* ======================================================
-   GUARDAR PUNTO
-====================================================== */
+/* GUARDAR PUNTO */
 
 async function savePoint(){
+
+  if (!isAuthenticated()) {
+    showError('Debes iniciar sesión para registrar un punto');
+    window.location.href = 'login.html';
+    return;
+  }
 
   if(!validateForm()){
     return;
@@ -534,9 +557,7 @@ async function savePoint(){
 
 }
 
-/* ======================================================
-   LIMPIAR FORMULARIO
-====================================================== */
+/* LIMPIAR FORMULARIO */
 
 function clearForm() {
 
@@ -553,77 +574,339 @@ function clearForm() {
 
 }
 
-/* ======================================================
-   RENDER TABLA
-====================================================== */
+/* RENDER TABLA */
 
 function renderPoints(
   points = state.points
 ) {
 
+  if (!pointsBody) {
+    return;
+  }
+
   if (!points.length) {
 
     pointsBody.innerHTML = `
       <tr>
-        <td colspan="7">
+        <td colspan="8">
           No hay registros aún
         </td>
       </tr>
     `;
 
+    updateStatistics(points);
     return;
 
   }
 
   pointsBody.innerHTML =
+    points.map(createPointRow).join('');
 
-  points.map((point) => `
-
-    <tr>
-
-      <td>
-        ${escapeHTML(point.tipo)}
-      </td>
-
-      <td>
-        ${escapeHTML(point.distrito)}
-      </td>
-
-      <td>
-        ${escapeHTML(String(point.seccion))}
-      </td>
-
-      <td>
-        ${escapeHTML(point.municipio)}
-      </td>
-
-      <td>
-        ${escapeHTML(point.calle)}
-      </td>
-
-      <td>
-        ${escapeHTML(point.colonia)}
-      </td>
-
-      <td>
-        ${escapeHTML(point.encargado || '-')}
-      </td>
-
-    </tr>
-
-  `).join('');
+  updateStatistics(points);
 
 }
 
-/* ======================================================
-   APP.JS
-   PARTE 2
-   FILTROS + MARKERS + UTILIDADES
-====================================================== */
+function createPointRow(point) {
+  const authUser = typeof getAuthUser === 'function' ? getAuthUser() : null;
+  const hasEditPermissions = authUser?.rol === 'admin';
 
-/* ======================================================
-   FILTRAR REGISTROS
-====================================================== */
+  return `
+    <tr data-point-id="${point.id}">
+      <td>${escapeHTML(point.tipo)}</td>
+      <td>${escapeHTML(point.distrito)}</td>
+      <td>${escapeHTML(String(point.seccion))}</td>
+      <td>${escapeHTML(point.municipio)}</td>
+      <td>${escapeHTML(point.calle)}</td>
+      <td>${escapeHTML(point.colonia)}</td>
+      <td>${escapeHTML(point.encargado || '-')}</td>
+      <td>
+        ${hasEditPermissions ? `
+          <button type="button" data-action="edit" class="btn-edit">Editar</button>
+          <button type="button" data-action="delete" class="btn-delete">Eliminar</button>
+        ` : '<span style="color:#94a3b8;">Sin permiso</span>'}
+      </td>
+    </tr>
+  `;
+}
+
+function updateStatistics(points = state.points) {
+  const totalElement = document.getElementById('statsTotal');
+  const byTypeElement = document.getElementById('statsByType');
+  const filteredTotalElement = document.getElementById('statsFilteredTotal');
+
+  if (!totalElement && !byTypeElement && !filteredTotalElement) {
+    return;
+  }
+
+  const total = points.length;
+  const counts = points.reduce((acc, point) => {
+    const type = point.tipo || 'Desconocido';
+    acc[type] = (acc[type] || 0) + 1;
+    return acc;
+  }, {});
+
+  if (totalElement) {
+    totalElement.textContent = total;
+  }
+
+  if (filteredTotalElement) {
+    filteredTotalElement.textContent = total;
+  }
+
+  if (byTypeElement) {
+    byTypeElement.innerHTML = Object.entries(counts)
+      .map(([type, count]) => `
+        <div class="stat-row">
+          <span>${escapeHTML(type)}</span>
+          <strong>${count}</strong>
+        </div>
+      `)
+      .join('');
+  }
+}
+
+function handlePointsTableClick(event) {
+  const button = event.target.closest('button[data-action]');
+  if (!button) return;
+
+  const row = button.closest('tr');
+  const id = Number(row?.dataset.pointId);
+  if (!id) return;
+
+  if (button.dataset.action === 'edit') {
+    openEditModalById(id);
+    return;
+  }
+
+  if (button.dataset.action === 'delete') {
+    deletePoint(id);
+    return;
+  }
+}
+
+/* EDITAR PUNTO*/
+
+function editPoint(id) {
+  openEditModalById(id);
+}
+
+async function openEditModalById(id) {
+  const point = state.points.find(
+    p => p.id === id
+  );
+
+  if (!point) {
+    showError(
+      'Punto no encontrado'
+    );
+    return;
+  }
+
+  if (typeof openEditModal === 'function') {
+    openEditModal(point);
+  } else {
+    showError(
+      'No es posible editar en este momento'
+    );
+  }
+}
+
+async function saveEditedPoint() {
+  const modal = document.getElementById('editModal');
+  if (!modal) return;
+
+  const id = Number(modal.dataset.pointId);
+  const point = state.points.find(p => p.id === id);
+
+  if (!point) {
+    showError('Punto no encontrado');
+    return;
+  }
+
+  const tipo = document.getElementById('modalPointType')?.value?.trim();
+  const distrito = document.getElementById('modalDistrito')?.value?.trim();
+  const seccion = document.getElementById('modalSeccion')?.value?.trim();
+  const calle = document.getElementById('modalCalle')?.value?.trim();
+  const colonia = document.getElementById('modalColonia')?.value?.trim();
+  const municipio = document.getElementById('modalMunicipio')?.value?.trim();
+  const encargado = document.getElementById('modalEncargado')?.value?.trim();
+
+  if (!tipo || !distrito || !seccion || !calle || !colonia || !municipio) {
+    showError('Completa todos los campos requeridos');
+    return;
+  }
+
+  try {
+    await updatePuntoRequest(id, {
+      tipo,
+      distrito,
+      seccion,
+      calle,
+      colonia,
+      municipio,
+      encargado
+    });
+
+    closeEditModal();
+    await reloadAllData();
+    showSuccess('Cambios guardados correctamente');
+
+  } catch (error) {
+    console.error(error);
+    if (error.message.includes('Token')) {
+      clearAuthData();
+      window.location.href = 'login.html';
+      return;
+    }
+    showError('Error guardando cambios');
+  }
+}
+
+async function loadPointObservation(pointId) {
+  try {
+    const [observation, history] = await Promise.all([
+      fetchLatestObservation(pointId),
+      fetchAuditHistory(pointId)
+    ]);
+
+    renderLatestObservation(observation);
+    renderAuditHistory(history);
+  } catch (error) {
+    console.error('Error cargando observaciones:', error);
+    const latestEl = document.getElementById('modalLatestObservation');
+    if (latestEl) {
+      latestEl.innerHTML = '<p class="text-muted">No fue posible cargar observaciones.</p>';
+    }
+  }
+}
+
+function renderLatestObservation(observation) {
+  const latestEl = document.getElementById('modalLatestObservation');
+  if (!latestEl) return;
+
+  if (!observation) {
+    latestEl.innerHTML = '<p class="text-muted">Sin observaciones registradas aún.</p>';
+    return;
+  }
+
+  latestEl.innerHTML = `
+    <div class="observation-card">
+      <p><strong>Última observación:</strong></p>
+      <p>${escapeHTML(observation.comentario)}</p>
+      <p><strong>Prioridad:</strong> ${escapeHTML(observation.prioridad)}</p>
+      <p class="text-muted">Por ${escapeHTML(observation.usuario_nombre || observation.usuario_email || 'Usuario')} el ${new Date(observation.created_at).toLocaleString('es-MX')}</p>
+    </div>
+  `;
+}
+
+function renderAuditHistory(history = []) {
+  const auditEl = document.getElementById('modalAuditHistory');
+  if (!auditEl) return;
+
+  if (!Array.isArray(history) || history.length === 0) {
+    auditEl.innerHTML = '<p class="text-muted">No hay historial de auditoría.</p>';
+    return;
+  }
+
+  auditEl.innerHTML = `
+    <h3>Historial de auditoría</h3>
+    <div class="audit-list">
+      ${history.slice(0, 5).map(entry => `
+        <div class="audit-item">
+          <p><strong>${escapeHTML(entry.usuario_nombre || entry.usuario_email || 'Usuario')}</strong> cambió de <strong>${escapeHTML(entry.estado_anterior)}</strong> a <strong>${escapeHTML(entry.estado_nuevo)}</strong></p>
+          <p class="text-muted">${new Date(entry.created_at).toLocaleString('es-MX')}</p>
+          ${entry.comentario ? `<p>${escapeHTML(entry.comentario)}</p>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+async function saveObservation() {
+  const modal = document.getElementById('editModal');
+  if (!modal) return;
+
+  const pointId = Number(modal.dataset.pointId);
+  const comentario = document.getElementById('modalObservationComment')?.value?.trim();
+  const prioridad = document.getElementById('modalObservationPriority')?.value || 'MEDIUM';
+
+  if (!comentario) {
+    showError('Escribe un comentario antes de guardar.');
+    return;
+  }
+
+  try {
+    await createObservationRequest(pointId, comentario, prioridad);
+    document.getElementById('modalObservationComment').value = '';
+    showSuccess('Observación registrada correctamente');
+    await loadPointObservation(pointId);
+  } catch (error) {
+    console.error(error);
+    showError('No se pudo crear la observación');
+  }
+}
+
+async function changePointState() {
+  const modal = document.getElementById('editModal');
+  if (!modal) return;
+
+  const pointId = Number(modal.dataset.pointId);
+  const estado = document.getElementById('modalPointState')?.value;
+  const comentario = document.getElementById('modalStateComment')?.value?.trim();
+
+  if (!estado) {
+    showError('Selecciona un estado válido.');
+    return;
+  }
+
+  try {
+    await updatePuntoStateRequest(pointId, estado, comentario);
+    showSuccess('Estado actualizado correctamente');
+    await reloadAllData();
+    await loadPointObservation(pointId);
+  } catch (error) {
+    console.error(error);
+    showError('No se pudo cambiar el estado');
+  }
+}
+
+/* ELIMINAR PUNTO*/
+
+async function deletePoint(id) {
+
+  const confirmDelete = confirm(
+    '¿Eliminar este punto?'
+  );
+
+  if(!confirmDelete){
+
+    return;
+
+  }
+
+  try {
+
+    await deletePuntoRequest(id);
+
+    await reloadAllData();
+
+    showSuccess(
+      'Punto eliminado'
+    );
+
+  } catch(error){
+
+    console.error(error);
+
+    showError(
+      'Error eliminando'
+    );
+
+  }
+
+}
+
+/* FILTRAR REGISTROS*/
 
 function applyFilters() {
 
@@ -715,13 +998,18 @@ state.points.filter((point) => {
 
 });
 
+  state.filteredPoints = filtered;
   renderPoints(filtered);
 
-  renderFilteredMarkers(filtered);
+  renderMapOverlay(filtered);
 
   showSuccess(
     `${filtered.length} registros encontrados`
   );
+
+  if (typeof updateDashboardData === 'function') {
+    updateDashboardData();
+  }
 
 }
 
@@ -779,49 +1067,31 @@ async function loadSavedPoints() {
 
     clearAllMarkers();
 
-    state.points =
-
-    points.map((point) => ({
-
-      tipo:
-      point.tipo,
-
-      lat:
-      Number(point.lat),
-
-      lng:
-      Number(point.lng),
-
-      distrito:
-      point.distrito,
-
-      seccion:
-      point.seccion,
-
-      calle:
-      point.calle,
-
-      colonia:
-      point.colonia,
-
-      municipio:
-      point.municipio,
-
-      encargado:
-      point.encargado,
-
-      url:
-      point.url
-
+    const mappedPoints = points.map((point) => ({
+      id: point.id,
+      tipo: point.tipo,
+      lat: Number(point.lat),
+      lng: Number(point.lng),
+      distrito: point.distrito,
+      seccion: point.seccion,
+      calle: point.calle,
+      colonia: point.colonia,
+      municipio: point.municipio,
+      encargado: point.encargado,
+      url: point.url,
+      estado: point.estado,
+      usuario_id: point.usuario_id,
+      created_at: point.created_at,
+      updated_at: point.updated_at
     }));
+
+    setPoints(mappedPoints);
 
     renderPoints();
 
-    state.points.forEach((point) => {
-
-      addMarker(point);
-
-    });
+    if (state.map) {
+      renderMapOverlay(state.points);
+    }
 
     console.log(
       'Puntos cargados:',
@@ -863,26 +1133,25 @@ async function reloadAllData() {
 
 function resetFilters() {
 
-  filterType.value =
-  'all';
+  if (filterType) filterType.value = 'all';
+  if (filterDistrict) filterDistrict.value = '';
+  if (filterSection) filterSection.value = '';
+  if (filterMunicipio) filterMunicipio.value = '';
+  if (filterEncargado) filterEncargado.value = '';
 
-  filterDistrict.value =
-  '';
-
-  filterSection.value =
-  '';
-
-  filterMunicipio.value =
-  '';
-
-  filterEncargado.value =
-  '';
+  state.filteredPoints = state.points;
 
   renderPoints();
 
-  renderFilteredMarkers(
-    state.points
-  );
+  if (typeof renderMapOverlay === 'function') {
+    renderMapOverlay(state.points);
+  }
+
+  updateStatistics(state.points);
+
+  if (typeof updateDashboardData === 'function') {
+    updateDashboardData();
+  }
 
 }
 
@@ -1199,7 +1468,9 @@ document.addEventListener(
 
       event.preventDefault();
 
-      filterDistrict.focus();
+      if (filterDistrict) {
+        filterDistrict.focus();
+      }
 
     }
 
@@ -1221,14 +1492,6 @@ window.GeoDistrito = {
   getAppState
 
 };
-
-btnClearFilters.addEventListener(
-
-  'click',
-
-  resetFilters
-
-);
 
 function escapeHTML(text) {
 

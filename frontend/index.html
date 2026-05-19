@@ -20,6 +20,14 @@
         rel="stylesheet"
         href="https://unpkg.com/leaflet/dist/leaflet.css"
     >
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+    >
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
+    >
 
   <!-- CSS -->
   <link
@@ -35,11 +43,14 @@
 
     <!-- HEADER -->
     <header class="topbar">
-
-        <h1>
-          GeoDistrito
-        </h1>
-
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div>
+          <h1>
+            GeoDistrito
+          </h1>
+        </div>
+        <a href="admin.html" class="topbar-link">Administración</a>
+      </div>
     </header>
 
     <!-- MAIN -->
@@ -182,82 +193,17 @@
 
                 </button>
 
-            </section>
-
-            <!-- FILTROS -->
-            <section class="card">
-
-                <h2>
-                  Filtros
-                </h2>
-
-                <!-- TIPO -->
-                <select id="filterType">
-
-                    <option value="all">
-                      Todos
-                    </option>
-
-                    <option value="bardas">
-                      Bardas
-                    </option>
-
-                    <option value="lonas">
-                      Lonas
-                    </option>
-
-                    <option value="comites">
-                      Comités
-                    </option>
-
-                    <option value="casillas">
-                      Casillas
-                    </option>
-
-                </select>
-
-                <!-- DISTRITO -->
-                <input
-                    type="text"
-                    id="filterDistrict"
-                    placeholder="Distrito"
-                >
-
-                <!-- SECCIÓN -->
-                <input
-                    type="text"
-                    id="filterSection"
-                    placeholder="Sección"
-                >
-
-                <!-- MUNICIPIO -->
-                <input
-                    type="text"
-                    id="filterMunicipio"
-                    placeholder="Municipio"
-                >
-
-                <!-- ENCARGADO -->
-                <input
-                    type="text"
-                    id="filterEncargado"
-                    placeholder="Encargado"
-                >
-
-                <!-- BOTÓN -->
-                <button id="btnApplyFilters">
-
-                    Aplicar filtros
-
-                </button>
-
-                <button id="btnClearFilters">
-
-                Limpiar filtros
-
-                </button>
+                <section class="card">
+                  <h2>Vista de mapa</h2>
+                  <div class="map-toggle-group">
+                    <button id="btnMapMarkers" class="btn-secondary btn-active">Marcadores</button>
+                    <button id="btnMapClusters" class="btn-secondary">Clusters</button>
+                    <button id="btnMapHeat" class="btn-secondary">Heatmap</button>
+                  </div>
+                </section>
 
             </section>
+
 
         </aside>
 
@@ -270,74 +216,14 @@
 
     </main>
 
-    <!-- TABLA -->
-    <section class="table-section card">
-
-        <div class="table-header">
-
-            <h2>
-              Registros
-            </h2>
-
-            <button id="btnExport">
-
-                Exportar Excel
-
-            </button>
-
-        </div>
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                      Tipo
-                    </th>
-
-                    <th>
-                      Distrito
-                    </th>
-
-                    <th>
-                      Sección
-                    </th>
-
-                    <th>
-                      Municipio
-                    </th>
-
-                    <th>
-                      Calle
-                    </th>
-
-                    <th>
-                      Colonia
-                    </th>
-
-                    <th>
-                      Encargado
-                    </th>
-
-                </tr>
-
-            </thead>
-
-            <tbody id="pointsBody">
-
-            </tbody>
-
-        </table>
-
-    </section>
 
 </div>
 
 <!-- LIBRERÍAS -->
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
 

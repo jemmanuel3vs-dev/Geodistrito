@@ -129,56 +129,36 @@ function calculateCentroid(
    LOAD SECTIONS
 ========================= */
 
-function loadSections(){
-
-  fetch('data/secciones.json')
-
-  .then(response => response.json())
-
-  .then(data => {
+async function loadSections(){
+  try {
+    const response = await fetch('data/secciones.json');
+    const data = await response.json();
 
     const features =
-
-    data.features
-
-    .filter(feature => {
-
-      return (
-
-        feature.geometry &&
-        feature.properties
-
-      );
-
-    })
-
-    .map(transformFeature)
-
-    .filter(Boolean);
+      data.features
+      .filter(feature => {
+        return (
+          feature.geometry &&
+          feature.properties
+        );
+      })
+      .map(transformFeature)
+      .filter(Boolean);
 
     state.sectionCentroids =
+      features.map(feature => {
+        const centroid =
+          calculateCentroid(
+            feature.geometry.coordinates
+          );
 
-    features.map(feature => {
-
-      const centroid =
-
-      calculateCentroid(
-        feature.geometry.coordinates
-      );
-
-      return {
-
-        ...feature.properties,
-
-        lat: centroid[0],
-
-        lng: centroid[1],
-
-        feature
-
-      };
-
-    });
+        return {
+          ...feature.properties,
+          lat: centroid[0],
+          lng: centroid[1],
+          feature
+        };
+      });
 
   /* =========================
    COLORES POR DISTRITO
@@ -309,10 +289,10 @@ L.geoJSON(
 
 ).addTo(state.map);
 
-  })
-
-  .catch(console.error);
-
+  }
+  catch (error) {
+    console.error(error);
+  }
 }
 
 /* =========================

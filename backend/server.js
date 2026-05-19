@@ -4,6 +4,7 @@ const path = require('path');
 require('dotenv').config();
 
 const puntosRoutes = require('./routes/puntos.routes');
+const authRoutes = require('./routes/auth.routes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 /* =========================
    RUTAS API
 ========================= */
+app.use('/api/auth', authRoutes);
 app.use('/api/puntos', puntosRoutes);
 
 /* =========================

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoDistrito - Admin</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+<div class="app-container">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div>
+        <p class="eyebrow">Plataforma GIS Administrativa</p>
+        <h1>GeoDistrito Dashboard</h1>
+        <p class="subtitle">Visualiza estadísticas reales, administra registros y monitorea actividad geográfica desde una sola vista.</p>
+      </div>
+      <div class="topbar-actions">
+        <button id="btnRefreshDashboard" class="btn-primary">Actualizar</button>
+        <a href="index.html" class="topbar-link">Ir al mapa</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="kpi-grid" id="dashboardRoot">
+    <article class="kpi-card">
+      <span>Total puntos</span>
+      <strong id="kpiTotalPoints">0</strong>
+    </article>
+    <article class="kpi-card">
+      <span>Total distritos</span>
+      <strong id="kpiDistricts">0</strong>
+    </article>
+    <article class="kpi-card">
+      <span>Total secciones</span>
+      <strong id="kpiSections">0</strong>
+    </article>
+    <article class="kpi-card">
+      <span>Total municipios</span>
+      <strong id="kpiMunicipalities">0</strong>
+    </article>
+    <article class="kpi-card">
+      <span>Total comités</span>
+      <strong id="kpiComites">0</strong>
+    </article>
+    <article class="kpi-card">
+      <span>Usuarios activos</span>
+      <strong id="kpiActiveUsers">0</strong>
+    </article>
+  </section>
+
+  <section class="panel-row">
+    <div class="card panel-card">
+      <div class="panel-header">
+        <h2>Filtros rápidos</h2>
+        <span id="dashboardUpdated" class="text-muted">Última actualización: -</span>
+      </div>
+      <div class="panel-grid">
+        <div class="input-group">
+          <label for="filterType">Tipo</label>
+          <select id="filterType">
+            <option value="all">Todos</option>
+            <option value="bardas">Bardas</option>
+            <option value="lonas">Lonas</option>
+            <option value="comites">Comités</option>
+            <option value="casillas">Casillas</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="filterDistrict">Distrito</label>
+          <input type="text" id="filterDistrict" placeholder="Distrito">
+        </div>
+        <div class="input-group">
+          <label for="filterSection">Sección</label>
+          <input type="text" id="filterSection" placeholder="Sección">
+        </div>
+        <div class="input-group">
+          <label for="filterMunicipio">Municipio</label>
+          <input type="text" id="filterMunicipio" placeholder="Municipio">
+        </div>
+        <div class="input-group">
+          <label for="filterEncargado">Encargado</label>
+          <input type="text" id="filterEncargado" placeholder="Encargado">
+        </div>
+      </div>
+      <div class="panel-actions">
+        <button id="btnApplyFilters" class="btn-secondary">Aplicar filtros</button>
+        <button id="btnClearFilters" class="btn-secondary-outline">Limpiar filtros</button>
+      </div>
+    </div>
+    <div class="card panel-card export-card">
+      <div class="panel-header">
+        <h2>Exportar datos</h2>
+      </div>
+      <div class="panel-actions vertical export-buttons">
+        <button id="btnExportExcel" class="btn-primary">Excel</button>
+        <button id="btnExportCsv" class="btn-secondary">CSV</button>
+        <button id="btnExportGeoJson" class="btn-secondary">GeoJSON</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="charts-section">
+    <article class="chart-card">
+      <div class="chart-card-header">
+        <h3>Puntos por distrito</h3>
+      </div>
+      <canvas id="chartByDistrict"></canvas>
+    </article>
+    <article class="chart-card">
+      <div class="chart-card-header">
+        <h3>Puntos por tipo</h3>
+      </div>
+      <canvas id="chartByType"></canvas>
+    </article>
+    <article class="chart-card">
+      <div class="chart-card-header">
+        <h3>Actividad por fecha</h3>
+      </div>
+      <canvas id="chartActivity"></canvas>
+    </article>
+    <article class="chart-card">
+      <div class="chart-card-header">
+        <h3>Puntos por municipio</h3>
+      </div>
+      <canvas id="chartByMunicipality"></canvas>
+    </article>
+  </section>
+
+  <section class="table-section card">
+    <div class="table-header">
+      <div>
+        <h2>Registros</h2>
+        <p class="text-muted">Listado de puntos administrados y filtrados desde la base de datos.</p>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Distrito</th>
+            <th>Sección</th>
+            <th>Municipio</th>
+            <th>Calle</th>
+            <th>Colonia</th>
+            <th>Encargado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="pointsBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/state.js"></script>
+<script src="js/map.js"></script>
+<script src="js/sections.js"></script>
+<script src="js/api.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/filters.js"></script>
+<script src="js/excel.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

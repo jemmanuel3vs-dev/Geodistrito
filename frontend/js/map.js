@@ -50,6 +50,29 @@ function initMap() {
     }
   ).addTo(state.map);
 
+  state.clusterGroup = L.markerClusterGroup({
+    chunkedLoading: true,
+    maxClusterRadius: 40,
+    showCoverageOnHover: false
+  });
+
+  state.heatLayer = L.heatLayer([], {
+    radius: 30,
+    blur: 20,
+    maxZoom: 15,
+    gradient: {
+      0.2: '#38bdf8',
+      0.4: '#60a5fa',
+      0.6: '#a855f7',
+      0.8: '#f97316',
+      1.0: '#ef4444'
+    }
+  });
+
+  setupMapControls();
+
+  legend.addTo(state.map);
+
 }
 
 /* =========================
@@ -95,22 +118,170 @@ legend.onAdd = function(){
 
 };
 
-legend.addTo(state.map);
 
 /* =========================
    USER LOCATION
 ========================= */
 function initUserLocation() {
+  if (!state.map) return;
 
+  const initialLocation = [23.2494, -106.4111];
+
+  state.marker = L.marker(initialLocation, {
+    draggable: false
+  }).addTo(state.map);
+
+  state.circle = L.circle(initialLocation, {
+    radius: 80,
+    color: '#3388ff',
+    fillColor: '#3388ff',
+    fillOpacity: 0.15
+  }).addTo(state.map);
+}
+
+function setUserMarker(lat, lng) {
+  if (!state.map) return;
+  const coords = [lat, lng];
+
+  if (!state.marker) {
+    state.marker = L.marker(coords, { draggable: false }).addTo(state.map);
+  } else {
+    state.marker.setLatLng(coords);
+  }
+
+  if (!state.circle) {
+    state.circle = L.circle(coords, {
+      radius: 80,
+      color: '#3388ff',
+      fillColor: '#3388ff',
+      fillOpacity: 0.15
+    }).addTo(state.map);
+  } else {
+    state.circle.setLatLng(coords);
+  }
 }
 
 /* =========================
    INIT LAYERS
 ========================= */
 function initLayers() {
+  if (!state.map) return;
   Object.values(state.layers).forEach(layer => {
     layer.addTo(state.map);
   });
+}
+
+function setupMapControls() {
+  const markersButton = document.getElementById('btnMapMarkers');
+  const clustersButton = document.getElementById('btnMapClusters');
+  const heatButton = document.getElementById('btnMapHeat');
+
+  if (!markersButton || !clustersButton || !heatButton) {
+    return;
+  }
+
+  markersButton.addEventListener('click', () => setMapOverlayMode('markers'));
+  clustersButton.addEventListener('click', () => setMapOverlayMode('clusters'));
+  heatButton.addEventListener('click', () => setMapOverlayMode('heat'));
+
+  updateMapToggleButtons();
+}
+
+function setMapOverlayMode(mode) {
+  state.mapMode = mode;
+  updateMapToggleButtons();
+  renderMapOverlay(state.filteredPoints.length ? state.filteredPoints : state.points);
+}
+
+function updateMapToggleButtons() {
+  const buttons = [
+    { id: 'btnMapMarkers', mode: 'markers' },
+    { id: 'btnMapClusters', mode: 'clusters' },
+    { id: 'btnMapHeat', mode: 'heat' }
+  ];
+
+  buttons.forEach(({ id, mode }) => {
+    const button = document.getElementById(id);
+    if (!button) return;
+    button.classList.toggle('btn-active', state.mapMode === mode);
+  });
+}
+
+function renderMapOverlay(points = []) {
+  if (!state.map) return;
+
+  clearMapOverlays();
+
+  if (state.mapMode === 'clusters') {
+    renderClusterMarkers(points);
+    return;
+  }
+
+  if (state.mapMode === 'heat') {
+    renderHeatmap(points);
+    return;
+  }
+
+  renderStandardMarkers(points);
+}
+
+function renderStandardMarkers(points) {
+  clearMarkers();
+  points.forEach(point => addMarker(point));
+}
+
+function renderClusterMarkers(points) {
+  if (!state.clusterGroup) return;
+
+  state.clusterGroup.clearLayers();
+  points.forEach(point => {
+    const marker = createPointMarker(point);
+    if (marker) {
+      state.clusterGroup.addLayer(marker);
+    }
+  });
+
+  if (!state.map.hasLayer(state.clusterGroup)) {
+    state.clusterGroup.addTo(state.map);
+  }
+}
+
+function renderHeatmap(points) {
+  if (!state.heatLayer) return;
+
+  const heatPoints = points
+    .filter(point => point.lat && point.lng)
+    .map(point => [point.lat, point.lng, 0.6]);
+
+  state.heatLayer.setLatLngs(heatPoints);
+
+  if (!state.map.hasLayer(state.heatLayer)) {
+    state.heatLayer.addTo(state.map);
+  }
+}
+
+function clearMapOverlays() {
+  clearMarkers();
+  if (state.clusterGroup) {
+    state.clusterGroup.clearLayers();
+    if (state.map && state.map.hasLayer(state.clusterGroup)) {
+      state.map.removeLayer(state.clusterGroup);
+    }
+  }
+  if (state.heatLayer) {
+    state.heatLayer.setLatLngs([]);
+    if (state.map && state.map.hasLayer(state.heatLayer)) {
+      state.map.removeLayer(state.heatLayer);
+    }
+  }
+}
+
+function createPointMarker(point) {
+  if (!state.map || !point?.lat || !point?.lng) return null;
+
+  return L.marker([point.lat, point.lng], {
+    icon: icons[point.tipo] || icons.bardas
+  }).bindPopup(createPopup(point));
 }
 
 /* =========================
@@ -164,13 +335,8 @@ async function getAddress(lat, lng) {
    MARCADORES Y POPUPS
 ========================= */
 function addMarker(point) {
-  if (!point?.lat || !point?.lng) return;
-
-  const marker = L.marker([point.lat, point.lng], {
-    icon: icons[point.tipo] || icons.bardas
-  });
-
-  marker.bindPopup(createPopup(point));
+  const marker = createPointMarker(point);
+  if (!marker) return;
 
   const layer = state.layers[point.tipo];
   if (layer) marker.addTo(layer);
@@ -196,13 +362,9 @@ function clearMarkers() {
 }
 
 function renderAllMarkers() {
-  clearMarkers();
-  if (Array.isArray(state.points)) {
-    state.points.forEach(point => addMarker(point));
-  }
+  renderMapOverlay(state.points);
 }
 
 function renderFilteredMarkers(points) {
-  clearMarkers();
-  points.forEach(point => addMarker(point));
+  renderMapOverlay(points);
 }

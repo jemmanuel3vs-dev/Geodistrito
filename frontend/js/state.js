@@ -24,6 +24,8 @@ const state = {
 
   filteredPoints: [],
 
+  mapMode: 'markers',
+
   filters: {
 
     tipo: 'all',
@@ -37,6 +39,10 @@ const state = {
     encargado: ''
 
   },
+
+  clusterGroup: null,
+
+  heatLayer: null,
 
   layers: {
 
