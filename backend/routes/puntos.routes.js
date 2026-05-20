@@ -10,6 +10,14 @@ require(
 );
 
 const {
+  validateCreatePunto,
+  validateUpdatePunto,
+  handleValidationErrors
+} = require(
+  '../middleware/validator.middleware'
+);
+
+const {
 
   getPuntos,
   createPunto,
@@ -49,7 +57,11 @@ const {
   '../middleware/auth.middleware'
 );
 
-/*  GET */
+/* ======================================================
+   PUNTOS
+====================================================== */
+
+/* GET */
 
 router.get(
   '/',
@@ -64,13 +76,17 @@ router.post(
 
   verifyToken,
   requireRole('admin', 'capturista'),
+
   upload.single('image'),
+
+  validateCreatePunto,
+  handleValidationErrors,
 
   createPunto
 
 );
 
-/* PUT*/
+/* PUT */
 
 router.put(
 
@@ -78,6 +94,10 @@ router.put(
 
   verifyToken,
   requireRole('admin'),
+
+  validateUpdatePunto,
+  handleValidationErrors,
+
   updatePunto
 
 );
@@ -90,69 +110,126 @@ router.delete(
 
   verifyToken,
   requireRole('admin'),
+
   deletePunto
 
 );
 
-/* ========== ENDPOINTS ESTADÍSTICAS (FASE 4) ========== */
+/* ======================================================
+   ESTADÍSTICAS (FASE 4)
+====================================================== */
 
 /* GET /api/puntos/stats/overview */
-router.get('/stats/overview', getOverviewStats);
+
+router.get(
+  '/stats/overview',
+  getOverviewStats
+);
 
 /* GET /api/puntos/stats/by-district */
-router.get('/stats/by-district', getStatsByDistrict);
+
+router.get(
+  '/stats/by-district',
+  getStatsByDistrict
+);
 
 /* GET /api/puntos/stats/by-type */
-router.get('/stats/by-type', getStatsByType);
+
+router.get(
+  '/stats/by-type',
+  getStatsByType
+);
 
 /* GET /api/puntos/stats/by-municipality */
-router.get('/stats/by-municipality', getStatsByMunicipality);
+
+router.get(
+  '/stats/by-municipality',
+  getStatsByMunicipality
+);
 
 /* GET /api/puntos/stats/activity-by-date */
-router.get('/stats/activity-by-date', getActivityByDate);
+
+router.get(
+  '/stats/activity-by-date',
+  getActivityByDate
+);
 
 /* GET /api/puntos/stats/by-user */
-router.get('/stats/by-user', getStatsByUser);
+
+router.get(
+  '/stats/by-user',
+  getStatsByUser
+);
 
 /* GET /api/puntos/stats/by-state */
-router.get('/stats/by-state', getStatsByState);
 
-/* ========== ENDPOINTS OBSERVACIONES & AUDITORÍA (FASE 4) ========== */
+router.get(
+  '/stats/by-state',
+  getStatsByState
+);
 
-/* POST /api/puntos/:id/observations - Crear observación */
+/* ======================================================
+   OBSERVACIONES & AUDITORÍA (FASE 4)
+====================================================== */
+
+/* POST /api/puntos/:id/observations */
+
 router.post(
+
   '/:id/observations',
+
   verifyToken,
+
   createObservation
+
 );
 
-/* GET /api/puntos/:id/observations - Obtener última observación */
+/* GET /api/puntos/:id/observations */
+
 router.get(
+
   '/:id/observations',
+
   getObservation
+
 );
 
-/* PUT /api/puntos/:id/observations/:obsId - Editar observación (admin) */
+/* PUT /api/puntos/:id/observations/:obsId */
+
 router.put(
+
   '/:id/observations/:obsId',
+
   verifyToken,
   requireRole('admin'),
+
   updateObservation
+
 );
 
-/* PATCH /api/puntos/:id/state - Cambiar estado (admin) */
+/* PATCH /api/puntos/:id/state */
+
 router.patch(
+
   '/:id/state',
+
   verifyToken,
   requireRole('admin'),
+
   updatePuntoState
+
 );
 
-/* GET /api/puntos/:id/audit - Obtener historial de cambios */
+/* GET /api/puntos/:id/audit */
+
 router.get(
+
   '/:id/audit',
+
   verifyToken,
+
   getAuditHistory
+
 );
 
 module.exports =
