@@ -129,36 +129,56 @@ function calculateCentroid(
    LOAD SECTIONS
 ========================= */
 
-async function loadSections(){
-  try {
-    const response = await fetch('data/secciones.json');
-    const data = await response.json();
+function loadSections(){
+
+  fetch('data/secciones.json')
+
+  .then(response => response.json())
+
+  .then(data => {
 
     const features =
-      data.features
-      .filter(feature => {
-        return (
-          feature.geometry &&
-          feature.properties
-        );
-      })
-      .map(transformFeature)
-      .filter(Boolean);
+
+    data.features
+
+    .filter(feature => {
+
+      return (
+
+        feature.geometry &&
+        feature.properties
+
+      );
+
+    })
+
+    .map(transformFeature)
+
+    .filter(Boolean);
 
     state.sectionCentroids =
-      features.map(feature => {
-        const centroid =
-          calculateCentroid(
-            feature.geometry.coordinates
-          );
 
-        return {
-          ...feature.properties,
-          lat: centroid[0],
-          lng: centroid[1],
-          feature
-        };
-      });
+    features.map(feature => {
+
+      const centroid =
+
+      calculateCentroid(
+        feature.geometry.coordinates
+      );
+
+      return {
+
+        ...feature.properties,
+
+        lat: centroid[0],
+
+        lng: centroid[1],
+
+        feature
+
+      };
+
+    });
 
   /* =========================
    COLORES POR DISTRITO
@@ -197,15 +217,16 @@ function getDistrictColor(
 
 function highlightFeature(e){
 
-  const layer = e.target;
+  const layer =
+  e.target;
 
   layer.setStyle({
 
     weight: 3,
 
-    color: '#111827',
+    color: '#000',
 
-    fillOpacity: 0.8
+    fillOpacity: 0.75
 
   });
 
@@ -275,12 +296,32 @@ L.geoJSON(
       });
 
       layer.bindPopup(`
-        <div class="popup-card">
-          <h3>Sección Electoral</h3>
-          <p><strong>Distrito:</strong> ${feature.properties.distrito_l}</p>
-          <p><strong>Sección:</strong> ${feature.properties.seccion}</p>
-          <p><strong>Municipio:</strong> ${feature.properties.municipio}</p>
+
+        <div style="
+          font-family: sans-serif;
+          min-width: 180px;
+        ">
+
+          <h3 style="
+            margin:0 0 10px;
+            color:#111827;
+          ">
+            Sección Electoral
+          </h3>
+
+          <b>Distrito:</b>
+          ${feature.properties.distrito_l}
+          <br>
+
+          <b>Sección:</b>
+          ${feature.properties.seccion}
+          <br>
+
+          <b>Municipio:</b>
+          ${feature.properties.municipio}
+
         </div>
+
       `);
 
     }
@@ -289,10 +330,10 @@ L.geoJSON(
 
 ).addTo(state.map);
 
-  }
-  catch (error) {
-    console.error(error);
-  }
+  })
+
+  .catch(console.error);
+
 }
 
 /* =========================
@@ -348,3 +389,8 @@ function getNearestSection(
   return null;
 
 }
+
+export {
+  loadSections,
+  getNearestSection
+};

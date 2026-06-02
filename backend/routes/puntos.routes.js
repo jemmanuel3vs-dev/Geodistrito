@@ -70,20 +70,22 @@ router.get(
 
 /* POST */
 
+// In development (local) we allow creating puntos without auth to ease testing.
+// In other environments keep the verifyToken+requireRole middlewares.
+const postAuthMiddlewares = [];
+// Disable auth for POST in dev, or when explicitly requested via DISABLE_AUTH
+const disableAuth = process.env.NODE_ENV === 'development' || process.env.DISABLE_AUTH === 'true';
+if (!disableAuth) {
+  postAuthMiddlewares.push(verifyToken, requireRole('admin', 'capturista'));
+}
+
 router.post(
-
   '/',
-
-  verifyToken,
-  requireRole('admin', 'capturista'),
-
+  ...postAuthMiddlewares,
   upload.single('image'),
-
   validateCreatePunto,
   handleValidationErrors,
-
   createPunto
-
 );
 
 /* PUT */
@@ -175,13 +177,9 @@ router.get(
 /* POST /api/puntos/:id/observations */
 
 router.post(
-
   '/:id/observations',
-
   verifyToken,
-
   createObservation
-
 );
 
 /* GET /api/puntos/:id/observations */

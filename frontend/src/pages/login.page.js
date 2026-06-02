@@ -1,4 +1,6 @@
-document.addEventListener('DOMContentLoaded', () => {
+import { isAuthenticated, login } from '../core/auth.js';
+
+function initLoginPage() {
   if (isAuthenticated()) {
     window.location.href = 'admin.html';
     return;
@@ -21,26 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        showLoginMessage(data.error || 'Error en el inicio de sesión', 'error');
-        return;
-      }
-
-      setAuthData({ token: data.token, user: data.user });
+      await login(email, password);
       window.location.href = 'admin.html';
     } catch (error) {
       console.error(error);
-      showLoginMessage('Error de conexión', 'error');
+      showLoginMessage(error.message || 'Error de conexión', 'error');
     }
   });
 
@@ -50,4 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
       message.className = `login-message ${type}`;
     }
   }
-});
+}
+
+document.addEventListener('DOMContentLoaded', initLoginPage);

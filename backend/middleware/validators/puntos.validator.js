@@ -1,12 +1,10 @@
 const { body } = require('express-validator');
 
 const tiposPermitidos = [
-  'basura',
-  'alumbrado',
-  'drenaje',
-  'agua',
-  'pavimentacion',
-  'verde'
+  'bardas',
+  'lonas',
+  'comites',
+  'casillas'
 ];
 
 const validateCreatePunto = [
@@ -15,7 +13,7 @@ const validateCreatePunto = [
     .notEmpty()
     .withMessage('El tipo de punto es obligatorio')
     .isIn(tiposPermitidos)
-    .withMessage('Tipo inválido. Opciones: basura, alumbrado, drenaje, agua, pavimentacion, verde'),
+    .withMessage('Tipo inválido. Opciones: bardas, lonas, comites, casillas'),
 
   body('lat')
     .trim()
@@ -62,7 +60,7 @@ const validateUpdatePunto = [
     .optional({ checkFalsy: true })
     .trim()
     .isIn(tiposPermitidos)
-    .withMessage('Tipo inválido. Opciones: basura, alumbrado, drenaje, agua, pavimentacion, verde'),
+    .withMessage('Tipo inválido. Opciones: bardas, lonas, comites, casillas'),
 
   body('lat')
     .optional({ checkFalsy: true })

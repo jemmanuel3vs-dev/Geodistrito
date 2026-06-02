@@ -31,23 +31,36 @@ async function createPunto(req, res) {
 
     } = req.body;
 
-    if (
-
-      !tipo ||
-      !lat ||
-      !lng ||
-      !distrito
-
-    ) {
-
+    // Validar campos obligatorios
+    if (!tipo || tipo.trim() === '') {
+      console.log('❌ Validación fallida: falta TIPO');
       return res.status(400).json({
-
-        error:
-        'Faltan datos obligatorios'
-
+        error: 'El tipo de punto es obligatorio'
       });
-
     }
+
+    if (!lat || isNaN(parseFloat(lat))) {
+      console.log('❌ Validación fallida: latitud inválida');
+      return res.status(400).json({
+        error: 'La latitud es obligatoria y debe ser un número válido'
+      });
+    }
+
+    if (!lng || isNaN(parseFloat(lng))) {
+      console.log('❌ Validación fallida: longitud inválida');
+      return res.status(400).json({
+        error: 'La longitud es obligatoria y debe ser un número válido'
+      });
+    }
+
+    if (!distrito || distrito.trim() === '') {
+      console.log('❌ Validación fallida: falta DISTRITO');
+      return res.status(400).json({
+        error: 'El distrito es obligatorio'
+      });
+    }
+
+    console.log('✅ Validación exitosa para:', { tipo, lat, lng, distrito });
 
     const baseUrl =
 
@@ -110,6 +123,9 @@ async function createPunto(req, res) {
 
     );
 
+    console.log('✅ Punto insertado en BD - ID:', result.insertId);
+    console.log('📸 URL de imagen:', imageUrl);
+
     res.json({
 
       ok: true,
@@ -122,12 +138,12 @@ async function createPunto(req, res) {
 
   } catch (error) {
 
-    console.error(error);
+    console.error('❌ Error al guardar punto:', error);
 
     res.status(500).json({
 
       error:
-      'Error guardando punto'
+      'Error guardando punto: ' + error.message
 
     });
 

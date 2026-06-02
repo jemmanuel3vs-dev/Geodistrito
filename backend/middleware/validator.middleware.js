@@ -1,4 +1,6 @@
+
 const { validationResult } = require('express-validator');
+
 const {
   validateCreatePunto,
   validateUpdatePunto
@@ -8,13 +10,11 @@ const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
+    console.log('Validation errors:', errors.array());
+
     return res.status(400).json({
-      ok: false,
       error: 'Validación fallida',
-      details: errors.array().map(err => ({
-        field: err.path,
-        message: err.msg
-      }))
+      details: errors.array()
     });
   }
 
@@ -26,3 +26,4 @@ module.exports = {
   validateUpdatePunto,
   handleValidationErrors
 };
+
