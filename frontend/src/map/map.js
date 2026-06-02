@@ -1,5 +1,8 @@
 import { state } from '../core/state.js';
 
+import { getAllPoints }
+from '../services/points.service.js';
+
 import {
   locateUser,
   locateFromLink
@@ -18,7 +21,9 @@ import {
 } from './map.districts.js';
 
 import {
-  renderPoints
+  renderPoints,
+  renderClusters,
+  renderHeatmap
 } from './map.markers.js';
 
 /* =========================
@@ -35,8 +40,10 @@ export function initMap() {
 /* =========================
    INIT LAYERS
 ========================= */
-
 export function initLayers() {
+
+  state.clusterGroup =
+    L.markerClusterGroup();
 
   console.log(
     '🗺️ Layers inicializadas'
@@ -50,7 +57,19 @@ export function initLayers() {
 
 export async function loadPoints() {
 
-  renderPoints();
+  try {
+
+    const points =
+      await getAllPoints();
+
+    state.points = points;
+    state.puntos = points;
+
+  } catch(error){
+
+    console.error(error);
+
+  }
 
 }
 
@@ -66,9 +85,82 @@ export function renderMapOverlay() {
 
 }
 
+export function setMapMode(mode) {
+
+  console.log(
+    `🗺️ Cambiando vista a: ${mode}`
+  );
+
+  state.mapMode = mode;
+
+  // Limpiar marcadores normales
+  state.savedMarkers.forEach(marker => {
+
+    if (
+      state.map.hasLayer(marker)
+    ) {
+
+      state.map.removeLayer(marker);
+
+    }
+
+  });
+
+  // Limpiar clusters
+  if (
+    state.clusterGroup &&
+    state.map.hasLayer(
+      state.clusterGroup
+    )
+  ) {
+
+    state.map.removeLayer(
+      state.clusterGroup
+    );
+
+  }
+
+  if (
+  state.heatLayer &&
+  state.map.hasLayer(
+    state.heatLayer
+  )
+) {
+
+  state.map.removeLayer(
+    state.heatLayer
+  );
+
+}
+
+  switch(mode){
+
+  case 'markers':
+    renderPoints();
+    break;
+
+  case 'clusters':
+    renderClusters();
+    state.map.addLayer(
+      state.clusterGroup
+    );
+    break;
+
+  case 'heat':
+    renderHeatmap();
+    state.map.addLayer(
+      state.heatLayer
+    );
+    break;
+
+}
+
+}
+
 export {
   loadSections,
   loadDistricts,
   locateUser,
   locateFromLink
 };
+

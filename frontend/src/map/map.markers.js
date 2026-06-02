@@ -45,14 +45,146 @@ export function setUserMarker(lat, lng) {
  */
 export function renderPoints() {
 
-  console.log('📍 Renderizando puntos...');
+  console.log('📍 Renderizando puntos');
 
-  if (!state.points || state.points.length === 0) {
-    console.log('⚠️ No hay puntos para renderizar');
+  if (!state.points?.length) {
+
+    console.warn(
+      '⚠️ No hay puntos'
+    );
+
     return;
+
   }
 
-  console.log(`📍 Renderizando ${state.points.length} puntos`);
+  state.savedMarkers.forEach(marker => {
+    state.map.removeLayer(marker);
+  });
+
+  state.savedMarkers = [];
+
+  state.points.forEach(point => {
+
+    const lat =
+      parseFloat(point.lat);
+
+    const lng =
+      parseFloat(point.lng);
+
+    if (
+      isNaN(lat) ||
+      isNaN(lng)
+    ) {
+      return;
+    }
+
+    const marker =
+      L.marker([
+        lat,
+        lng
+      ])
+      .bindPopup(`
+        <strong>${point.tipo}</strong><br>
+        Distrito: ${point.distrito}<br>
+        Sección: ${point.seccion}
+      `)
+      .addTo(state.map);
+
+    state.savedMarkers.push(
+      marker
+    );
+
+  });
+
+  console.log(
+    `✅ ${state.savedMarkers.length} marcadores renderizados`
+  );
 
 }
 
+export function renderClusters() {
+
+  if (!state.points?.length) {
+    return;
+  }
+
+  state.clusterGroup.clearLayers();
+
+  state.points.forEach(point => {
+
+    const lat =
+      parseFloat(point.lat);
+
+    const lng =
+      parseFloat(point.lng);
+
+    if (
+      isNaN(lat) ||
+      isNaN(lng)
+    ) {
+      return;
+    }
+
+    const marker =
+      L.marker([lat, lng])
+      .bindPopup(`
+        <strong>${point.tipo}</strong><br>
+        Distrito: ${point.distrito}<br>
+        Sección: ${point.seccion}
+      `);
+
+    state.clusterGroup.addLayer(
+      marker
+    );
+
+  });
+
+}
+
+export function renderHeatmap() {
+
+  if (!state.points?.length) {
+    return;
+  }
+
+  const heatData = [];
+
+  state.points.forEach(point => {
+
+    const lat = parseFloat(point.lat);
+    const lng = parseFloat(point.lng);
+
+    if (
+      isNaN(lat) ||
+      isNaN(lng)
+    ) {
+      return;
+    }
+
+    heatData.push([
+      lat,
+      lng,
+      1
+    ]);
+
+  });
+
+  if (state.heatLayer) {
+
+    state.map.removeLayer(
+      state.heatLayer
+    );
+
+  }
+
+  state.heatLayer =
+    L.heatLayer(
+      heatData,
+      {
+        radius: 25,
+        blur: 15,
+        maxZoom: 17
+      }
+    );
+
+}

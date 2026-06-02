@@ -6,7 +6,8 @@ import {
   loadSections,
   locateUser,
   locateFromLink,
-  renderMapOverlay
+  renderMapOverlay,
+  setMapMode
 } from '../map/map.js';
 
 import {
@@ -36,6 +37,10 @@ export async function initHome() {
 
     await loadPoints();
 
+    setMapMode(
+  'markers'
+);
+
     renderMapOverlay();
 
     setupEvents();
@@ -57,6 +62,21 @@ export async function initHome() {
 }
 
 function setupEvents() {
+
+  const btnMapHeat =
+document.getElementById(
+  'btnMapHeat'
+);
+
+  const btnMapMarkers =
+document.getElementById(
+  'btnMapMarkers'
+);
+
+const btnMapClusters =
+document.getElementById(
+  'btnMapClusters'
+);
 
   const btnLoadLink =
   document.getElementById(
@@ -99,6 +119,39 @@ function setupEvents() {
   );
 
   }
+
+  btnMapMarkers?.addEventListener(
+  'click',
+  () => {
+
+    setMapMode(
+      'markers'
+    );
+
+  }
+);
+
+btnMapClusters?.addEventListener(
+  'click',
+  () => {
+
+    setMapMode(
+      'clusters'
+    );
+
+  }
+);
+
+btnMapHeat?.addEventListener(
+  'click',
+  () => {
+
+    setMapMode(
+      'heat'
+    );
+
+  }
+);
 
 }
 
