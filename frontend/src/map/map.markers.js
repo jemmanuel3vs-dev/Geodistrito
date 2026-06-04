@@ -10,15 +10,18 @@ export function setUserMarker(lat, lng) {
   console.log('📌 setUserMarker:', { lat, lng });
 
   // Eliminar marcador anterior si existe
-  if (state.marker) {
+  if (
+  state.marker &&
+  state.map.hasLayer(
+    state.marker
+  )
+) {
 
-    console.log('🗑️ Removiendo marcador anterior');
+  state.map.removeLayer(
+    state.marker
+  );
 
-    state.map.removeLayer(state.marker);
-
-    state.marker = null;
-
-  }
+}
 
   // Crear nuevo marcador
   state.marker = L.marker(
@@ -169,13 +172,15 @@ export function renderHeatmap() {
 
   });
 
-  if (state.heatLayer) {
+ if (state.heatLayer) {
 
-    state.map.removeLayer(
-      state.heatLayer
-    );
+  state.map.removeLayer(
+    state.heatLayer
+  );
 
-  }
+  state.heatLayer = null;
+
+}
 
   state.heatLayer =
     L.heatLayer(

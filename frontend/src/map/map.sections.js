@@ -139,22 +139,18 @@ function loadSections(){
 
     const features =
 
-    data.features
+data.features
 
-    .filter(feature => {
+.filter(feature => {
 
-      return (
+  return (
 
-        feature.geometry &&
-        feature.properties
+    feature.geometry &&
+    feature.properties
 
-      );
+  );
 
-    })
-
-    .map(transformFeature)
-
-    .filter(Boolean);
+});
 
     state.sectionCentroids =
 

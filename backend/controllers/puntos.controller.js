@@ -53,22 +53,71 @@ async function createPunto(req, res) {
       });
     }
 
-    if (!distrito || distrito.trim() === '') {
-      console.log('❌ Validación fallida: falta DISTRITO');
-      return res.status(400).json({
-        error: 'El distrito es obligatorio'
-      });
-    }
+   if (!distrito || distrito.trim() === '') {
+  console.log('❌ Validación fallida: falta DISTRITO');
+  return res.status(400).json({
+    error: 'El distrito es obligatorio'
+  });
+}
 
-    console.log('✅ Validación exitosa para:', { tipo, lat, lng, distrito });
+console.log('✅ Validación exitosa para:', {
+  tipo,
+  lat,
+  lng,
+  distrito
+});
 
-    const baseUrl =
+/* =====================================
+   PROTECCIÓN CONTRA DUPLICADOS
+===================================== */
 
-      process.env.BACKEND_URL
+const [duplicados] = await db.execute(
+  `
+  SELECT id
+  FROM puntos
+  WHERE
+    tipo = ?
+    AND latitud = ?
+    AND longitud = ?
+    AND created_at >= DATE_SUB(
+      NOW(),
+      INTERVAL 10 SECOND
+    )
+  LIMIT 1
+  `,
+  [
+    tipo,
+    parseFloat(lat),
+    parseFloat(lng)
+  ]
+);
 
-      ||
+if (duplicados.length > 0) {
 
-      `http://localhost:${process.env.PORT || 3000}`;
+  console.warn(
+    '⚠️ Punto duplicado detectado'
+  );
+
+  return res.status(409).json({
+
+    error:
+      'Ya existe un punto similar registrado recientemente'
+
+  });
+
+}
+
+/* =====================================
+   CONTINÚA EL FLUJO NORMAL
+===================================== */
+
+const baseUrl =
+
+  process.env.BACKEND_URL
+
+  ||
+
+  `http://localhost:${process.env.PORT || 3000}`;
 
     const imageUrl =
 

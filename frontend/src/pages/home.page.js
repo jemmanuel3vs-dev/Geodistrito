@@ -1,3 +1,6 @@
+import {
+  loadColoniasDistrito20
+} from '../map/map.colonias.js';
 
 import {
   initLayers,
@@ -21,6 +24,9 @@ import {
 
 import { state } from '../core/state.js';
 
+let eventsInitialized = false;
+let saving = false;
+
 export async function initHome() {
 
   console.log(
@@ -34,6 +40,8 @@ export async function initHome() {
     initLayers();
 
     await loadSections();
+
+    await loadColoniasDistrito20();
 
     await loadPoints();
 
@@ -63,25 +71,37 @@ export async function initHome() {
 
 function setupEvents() {
 
+  if (eventsInitialized) {
+
+    console.warn(
+      '⚠️ Eventos ya inicializados'
+    );
+
+    return;
+
+  }
+
+  eventsInitialized = true;
+
   const btnMapHeat =
-document.getElementById(
-  'btnMapHeat'
-);
+    document.getElementById(
+      'btnMapHeat'
+    );
 
   const btnMapMarkers =
-document.getElementById(
-  'btnMapMarkers'
-);
+    document.getElementById(
+      'btnMapMarkers'
+    );
 
-const btnMapClusters =
-document.getElementById(
-  'btnMapClusters'
-);
+  const btnMapClusters =
+    document.getElementById(
+      'btnMapClusters'
+    );
 
   const btnLoadLink =
-  document.getElementById(
-  'btnLoadLink'
-  );
+    document.getElementById(
+      'btnLoadLink'
+    );
 
   const btnLocate =
     document.getElementById(
@@ -93,69 +113,65 @@ document.getElementById(
       'btnSave'
     );
 
-  if (btnLocate) {
+  btnLocate?.addEventListener(
+    'click',
+    locateUser
+  );
 
-    btnLocate.addEventListener(
-      'click',
-      locateUser
-    );
+  btnSave?.addEventListener(
+    'click',
+    savePoint
+  );
 
-  }
-
-  if (btnSave) {
-
-    btnSave.addEventListener(
-      'click',
-      savePoint
-    );
-
-  }
-
-  if(btnLoadLink){
-
-  btnLoadLink.addEventListener(
+  btnLoadLink?.addEventListener(
     'click',
     locateFromLink
   );
 
-  }
-
   btnMapMarkers?.addEventListener(
-  'click',
-  () => {
+    'click',
+    () => setMapMode('markers')
+  );
 
-    setMapMode(
-      'markers'
-    );
+  btnMapClusters?.addEventListener(
+    'click',
+    () => setMapMode('clusters')
+  );
 
-  }
-);
-
-btnMapClusters?.addEventListener(
-  'click',
-  () => {
-
-    setMapMode(
-      'clusters'
-    );
-
-  }
-);
-
-btnMapHeat?.addEventListener(
-  'click',
-  () => {
-
-    setMapMode(
-      'heat'
-    );
-
-  }
-);
+  btnMapHeat?.addEventListener(
+    'click',
+    () => setMapMode('heat')
+  );
 
 }
 
 async function savePoint() {
+
+  if (saving) {
+
+    console.warn(
+      '⚠️ Guardado en progreso'
+    );
+
+    return;
+
+  }
+
+  saving = true;
+
+  const btnSave =
+    document.getElementById(
+      'btnSave'
+    );
+
+  if (btnSave) {
+
+    btnSave.disabled = true;
+
+    btnSave.textContent =
+      'Guardando...';
+
+  }
 
   try {
 
@@ -224,14 +240,37 @@ async function savePoint() {
     document.getElementById('imagePreview').style.display = 'none';
     document.getElementById('encargado').value = '';
 
-  } catch (error) {
+    } catch (error) {
 
-    console.error('❌ Error guardando punto:', error);
+    console.error(
+      '❌ Error guardando punto:',
+      error
+    );
 
     showError(
-      error.message || 'Error guardando punto'
+      error.message ||
+      'Error guardando punto'
     );
+
+  } finally {
+
+    saving = false;
+
+    const btnSave =
+      document.getElementById(
+        'btnSave'
+      );
+
+    if (btnSave) {
+
+      btnSave.disabled = false;
+
+      btnSave.textContent =
+        'Guardar Punto';
+
+    }
 
   }
 
 }
+
