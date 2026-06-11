@@ -97,6 +97,7 @@
         <button id="btnExportExcel" class="btn-primary">Excel</button>
         <button id="btnExportCsv" class="btn-secondary">CSV</button>
         <button id="btnExportGeoJson" class="btn-secondary">GeoJSON</button>
+        <button id="btnImportExcel" class="btn-primary">Importar Excel</button>
       </div>
     </div>
   </section>
@@ -160,21 +161,76 @@
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="src/core/api.legacy.js"></script>
-<script src="src/core/auth.legacy.js"></script>
-<script type="module" src="src/core/state.js"></script>
-<script src="src/utils/guards.legacy.js"></script>
-<script src="src/modules/dashboard/charts.js"></script>
-<script src="src/modules/dashboard/dashboard.js"></script>
-<script src="src/ui/toast.js"></script>
-<script src="src/ui/modal.js"></script>
-<script src="src/pages/admin.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    if (typeof initAdminPage === 'function') {
-      initAdminPage();
-    }
-  });
-</script>
+
+<script type="module" src="src/app.js"></script>
+<!-- Modal de importación -->
+<div id="excelModal" class="modal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>
+
+                📄 Importar Excel
+
+            </h2>
+
+            <span id="closeExcelModal">
+
+                &times;
+
+            </span>
+
+        </div>
+
+        <div class="modal-body">
+
+            <p>
+
+                Selecciona un archivo Excel
+                para importar registros.
+
+            </p>
+
+            <input
+
+                type="file"
+
+                id="excelFile"
+
+                accept=".xlsx,.xls"
+
+            >
+
+            <p id="selectedFile">
+
+                Ningún archivo seleccionado
+
+            </p>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button
+                id="cancelImport">
+
+                Cancelar
+
+            </button>
+
+            <button
+                id="confirmImport">
+
+                📤 Importar
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 </body>
 </html>

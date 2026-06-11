@@ -5,6 +5,9 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+const importRoutes =
+require('./routes/import.routes');
+
 const puntosRoutes = require('./routes/puntos.routes');
 const authRoutes = require('./routes/auth.routes');
 
@@ -44,7 +47,7 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 ========================= */
 app.use('/api/auth', authRoutes);
 app.use('/api/puntos', puntosRoutes);
-
+app.use('/api/import', importRoutes);
 /* =========================
    RUTA TEST
 ========================= */

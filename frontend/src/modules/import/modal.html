@@ -1,0 +1,176 @@
+<div id="excelModal" class="modal">
+
+    <div class="modal-content import-modal">
+
+        <span
+            id="closeExcelModal"
+            class="close">
+
+            ×
+
+        </span>
+
+        <h2>
+
+            📄 Importar Excel
+
+        </h2>
+
+        <p>
+
+            Arrastra tu archivo Excel o selecciónalo.
+
+        </p>
+
+        <div id="dropZone">
+
+            <div class="dropIcon">
+
+                📂
+
+            </div>
+
+            <div>
+
+                Arrastra aquí tu archivo
+
+            </div>
+
+            <small>
+
+                o haz clic para seleccionarlo
+
+            </small>
+
+            <input
+
+                type="file"
+
+                id="excelFile"
+
+                accept=".xlsx,.xls"
+
+                hidden
+
+            >
+
+        </div>
+
+        <div id="selectedFile">
+
+            Ningún archivo seleccionado
+
+        </div>
+
+        <div class="importButtons">
+
+            <button
+                id="cancelImport">
+
+                Cancelar
+
+            </button>
+
+            <button
+                id="confirmImport">
+
+                📤 Importar
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+<style>
+
+    .import-modal{
+
+width:520px;
+
+max-width:95%;
+
+padding:30px;
+
+border-radius:15px;
+
+text-align:center;
+
+}
+
+#dropZone{
+
+border:3px dashed #3b82f6;
+
+padding:40px;
+
+border-radius:12px;
+
+cursor:pointer;
+
+margin-top:20px;
+
+transition:.3s;
+
+}
+
+#dropZone:hover{
+
+background:#eef5ff;
+
+}
+
+#dropZone.dragover{
+
+background:#dbeafe;
+
+transform:scale(1.02);
+
+}
+
+.dropIcon{
+
+font-size:50px;
+
+margin-bottom:15px;
+
+}
+
+#importButtons{
+
+margin-top:25px;
+
+display:flex;
+
+justify-content:flex-end;
+
+gap:15px;
+
+}
+
+.importButtons{
+
+display:flex;
+
+justify-content:flex-end;
+
+gap:15px;
+
+margin-top:25px;
+
+}
+
+#importButtons button,
+
+.importButtons button{
+
+padding:10px 20px;
+
+border:none;
+
+border-radius:8px;
+
+cursor:pointer;
+
+}

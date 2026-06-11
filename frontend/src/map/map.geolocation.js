@@ -285,7 +285,13 @@ async function performReverseGeocoding(lat, lng) {
     // Extraer información
     const address = data.address || {};
     const street = address.road || address.street || 'No disponible';
-    const neighborhood = address.neighbourhood || address.suburb || 'No disponible';
+    const colonia =
+    address.neighbourhood ??
+    address.suburb ??
+    address.residential ??
+    address.quarter ??
+    address.hamlet ??
+    null;
     const municipality = address.city || address.town || address.county || 'No disponible';
 
     // Actualizar UI

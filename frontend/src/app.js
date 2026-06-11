@@ -52,14 +52,40 @@ function detectPage() {
 async function loadPage(page) {
   switch (page) {
     case 'admin':
-      // En admin.html, admin.page.js ya está cargado vía script tag
-      console.log('📄 Página: Admin');
-      break;
+
+  console.log('📄 Página: Admin');
+
+  const {
+
+    initAdminPage
+
+  } = await import(
+
+    './pages/admin.page.js'
+
+  );
+
+  initAdminPage();
+
+  break;
 
     case 'login':
-      // En login.html, login.page.js ya está cargado vía script tag
-      console.log('📄 Página: Login');
-      break;
+
+  console.log('📄 Página: Login');
+
+  const {
+
+    initLogin
+
+  } = await import(
+
+    './pages/login.page.js'
+
+  );
+
+  initLogin();
+
+  break;
 
     case 'home':
     default:
