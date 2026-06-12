@@ -27,6 +27,7 @@ export function setUserMarker(lat, lng) {
   state.marker = L.marker(
     [lat, lng],
     {
+      pane: 'userPane',
       title: 'Ubicación actual',
       icon: L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
@@ -85,7 +86,10 @@ export function renderPoints() {
       L.marker([
         lat,
         lng
-      ])
+      ],
+      {
+        pane: 'markersPane'
+      })
       .bindPopup(`
         <strong>${point.tipo}</strong><br>
         Distrito: ${point.distrito}<br>
@@ -129,7 +133,12 @@ export function renderClusters() {
     }
 
     const marker =
-      L.marker([lat, lng])
+      L.marker(
+        [lat, lng],
+        {
+          pane: 'markersPane'
+        }
+      )
       .bindPopup(`
         <strong>${point.tipo}</strong><br>
         Distrito: ${point.distrito}<br>

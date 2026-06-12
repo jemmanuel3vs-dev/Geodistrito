@@ -2,105 +2,112 @@ import { state } from '../core/state.js';
 
 let coloniasLayer = null;
 
-export async function loadColoniasDistrito20() {
+export async function loadColonias() {
 
-  console.log(
-    '🚀 loadColoniasDistrito20 iniciado'
-  );
+    console.log("Cargando colonias...");
 
-  try {
+    try {
 
-    const response =
-      await fetch(
-        './data/colonias_distrito20.geojson'
-      );
+        const response =
+            await fetch("data/colonias_20_24.geojson");
 
-   
+        const geojson =
+            await response.json();
 
-    const geojson =
-      await response.json();
+        coloniasLayer = L.geoJSON(
+            geojson,
+            {
 
+                pane: "coloniasPane",
 
+                style: {
 
+                    color: "#ff6600",
 
-    console.log(
-      '📍 Primera coordenada:',
-      geojson.features[0]
-        ?.geometry
-    );
+                    weight: 2,
 
-    coloniasLayer =
-      L.geoJSON(
-        geojson,
-        {
-          color: '#ff6600',
-          weight: 2,
-          fillOpacity: 0.15,
+                    fillOpacity: 0.2
 
-          onEachFeature(
-            feature,
-            layer
-          ) {
+                },
 
-            layer.bindPopup(`
-              <strong>
-                ${feature.properties.NOMBRE}
-              </strong>
-            `);
+                onEachFeature(feature, layer) {
 
-          }
+                    const nombre =
+                        feature.properties.NOMBRE;
 
-        }
-      );
+                                      layer.bindPopup(`
+                      <div style="min-width:180px">
+                          <h3>${feature.properties.NOMBRE}</h3>
+                          <hr>
+                          <b>Código Postal:</b> ${feature.properties.CP}<br>
+                          <b>Municipio:</b> ${feature.properties.MUNICIPIO}<br>
+                          <b>ID:</b> ${feature.properties.ID}
+                      </div>
+                  `);
 
+                    layer.on("click", function () {
 
+                        this.openPopup();
 
-    coloniasLayer.addTo(
-      state.map
-    );
+                    });
 
+                }
 
+            }
 
+        );
 
+        coloniasLayer.addTo(state.map);
 
-  } catch(error){
+coloniasLayer.eachLayer(layer => {
 
+    layer.bringToFront();
 
+});
 
-  }
+        console.log(
+            "Colonias cargadas:",
+            geojson.features.length
+        );
 
-}
+    }
 
-export function showColoniasDistrito20() {
+    catch (error) {
 
-  if (
-    coloniasLayer &&
-    !state.map.hasLayer(
-      coloniasLayer
-    )
-  ) {
+        console.error(error);
 
-    coloniasLayer.addTo(
-      state.map
-    );
-
-  }
+    }
 
 }
 
-export function hideColoniasDistrito20() {
+export function showColonias() {
 
-  if (
-    coloniasLayer &&
-    state.map.hasLayer(
-      coloniasLayer
-    )
-  ) {
+    if (
+        coloniasLayer &&
+        !state.map.hasLayer(coloniasLayer)
+    ) {
 
-    state.map.removeLayer(
-      coloniasLayer
-    );
+        coloniasLayer.addTo(state.map);
 
-  }
+    }
+
+    coloniasLayer.eachLayer(layer => {
+
+        layer.bringToFront();
+
+    });
+
+}
+
+export function hideColonias() {
+
+    if (
+        coloniasLayer &&
+        state.map.hasLayer(coloniasLayer)
+    ) {
+
+        state.map.removeLayer(coloniasLayer);
+
+    }
 
 }

@@ -258,6 +258,8 @@ L.geoJSON(
 
   {
 
+    pane: 'sectionsPane',
+
     style: function(feature){
 
       return {

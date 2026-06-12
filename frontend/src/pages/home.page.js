@@ -1,5 +1,6 @@
 import {
-  loadColoniasDistrito20
+  loadColonias,
+  showColonias
 } from '../map/map.colonias.js';
 
 import {
@@ -7,8 +8,8 @@ import {
   initMap,
   loadPoints,
   loadSections,
-  locateUser,
   locateFromLink,
+  locateUser,
   renderMapOverlay,
   setMapMode
 } from '../map/map.js';
@@ -41,13 +42,14 @@ export async function initHome() {
 
     await loadSections();
 
-    await loadColoniasDistrito20();
+    await loadColonias();
 
     await loadPoints();
 
     setMapMode(
   'markers'
 );
+showColonias();
 
     renderMapOverlay();
 
