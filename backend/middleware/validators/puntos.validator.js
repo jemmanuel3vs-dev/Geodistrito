@@ -3,9 +3,14 @@ const { body } = require('express-validator');
 const tiposPermitidos = [
   'bardas',
   'lonas',
+  'espectaculares',
+  'vehiculos',
   'comites',
   'casillas'
 ];
+
+const tiposPermitidosMensaje =
+  'Tipo inválido. Opciones: bardas, lonas, espectaculares, vehiculos, comites, casillas';
 
 const validateCreatePunto = [
   body('tipo')
@@ -13,7 +18,7 @@ const validateCreatePunto = [
     .notEmpty()
     .withMessage('El tipo de punto es obligatorio')
     .isIn(tiposPermitidos)
-    .withMessage('Tipo inválido. Opciones: bardas, lonas, comites, casillas'),
+    .withMessage(tiposPermitidosMensaje),
 
   body('lat')
     .trim()
@@ -64,7 +69,7 @@ const validateUpdatePunto = [
     .optional({ checkFalsy: true })
     .trim()
     .isIn(tiposPermitidos)
-    .withMessage('Tipo inválido. Opciones: bardas, lonas, comites, casillas'),
+    .withMessage(tiposPermitidosMensaje),
 
   body('lat')
     .optional({ checkFalsy: true })

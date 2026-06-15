@@ -10,6 +10,7 @@ require('./routes/import.routes');
 
 const puntosRoutes = require('./routes/puntos.routes');
 const authRoutes = require('./routes/auth.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use(express.static(path.join(__dirname, '../frontend')));
    RUTAS API
 ========================= */
 app.use('/api/auth', authRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/puntos', puntosRoutes);
 app.use('/api/import', importRoutes);
 /* =========================
