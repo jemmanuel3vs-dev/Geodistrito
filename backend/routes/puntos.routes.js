@@ -69,11 +69,6 @@ router.get(
   getPuntos
 );
 
-router.get(
-  '/:id',
-  getPuntoById
-);
-
 /* POST */
 
 // In development (local) we allow creating puntos without auth to ease testing.
@@ -178,6 +173,11 @@ router.get(
 router.get(
   '/stats/by-state',
   getStatsByState
+);
+
+router.get(
+  '/:id',
+  getPuntoById
 );
 
 /* ======================================================

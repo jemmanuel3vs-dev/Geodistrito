@@ -80,18 +80,6 @@ async function createPunto(req, res) {
 
   try {
 
-    console.log(
-      "📥 Body:",
-      req.body
-    );
-
-    console.log(
-      "📎 Archivo:",
-      req.file
-      ? req.file.filename
-      : "No hay"
-    );
-
     const {
 
       tipo,
@@ -108,7 +96,6 @@ async function createPunto(req, res) {
 
     // Validar campos obligatorios
     if (!tipo || tipo.trim() === '') {
-      console.log('❌ Validación fallida: falta TIPO');
       return res.status(400).json({
         ok: false,
         error: 'El tipo de punto es obligatorio'
@@ -116,7 +103,6 @@ async function createPunto(req, res) {
     }
 
     if (!lat || isNaN(parseFloat(lat))) {
-      console.log('❌ Validación fallida: latitud inválida');
       return res.status(400).json({
         ok: false,
         error: 'La latitud es obligatoria y debe ser un número válido'
@@ -124,7 +110,6 @@ async function createPunto(req, res) {
     }
 
     if (!lng || isNaN(parseFloat(lng))) {
-      console.log('❌ Validación fallida: longitud inválida');
       return res.status(400).json({
         ok: false,
         error: 'La longitud es obligatoria y debe ser un número válido'
@@ -132,19 +117,11 @@ async function createPunto(req, res) {
     }
 
    if (!distrito || distrito.trim() === '') {
-  console.log('❌ Validación fallida: falta DISTRITO');
   return res.status(400).json({
     ok: false,
     error: 'El distrito es obligatorio'
   });
 }
-
-console.log('✅ Validación exitosa para:', {
-  tipo,
-  lat,
-  lng,
-  distrito
-});
 
 /* =====================================
    PROTECCIÓN CONTRA DUPLICADOS
@@ -191,14 +168,6 @@ if (duplicados.length > 0) {
 /* =====================================
    CONTINÚA EL FLUJO NORMAL
 ===================================== */
-
-const baseUrl =
-
-  process.env.BACKEND_URL
-
-  ||
-
-  `http://localhost:${process.env.PORT || 3000}`;
 
     const imageUrl =
       req.file
@@ -249,9 +218,6 @@ const baseUrl =
       ]
 
     );
-
-    console.log('✅ Punto insertado en BD - ID:', result.insertId);
-    console.log('📸 URL de imagen:', imageUrl);
 
     res.json({
 
@@ -359,7 +325,8 @@ async function updatePunto(req, res) {
       calle,
       colonia,
       municipio,
-      encargado
+      encargado,
+      url
 
     } = req.body;
 
@@ -390,6 +357,7 @@ async function updatePunto(req, res) {
         colonia = ?,
         municipio = ?,
         encargado = ?,
+        url = ?,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `;
@@ -405,6 +373,7 @@ async function updatePunto(req, res) {
         nextTextValue(colonia, current.colonia),
         nextTextValue(municipio, current.municipio),
         nextTextValue(encargado, current.encargado),
+        nextTextValue(url, current.url),
         id
 
       ]

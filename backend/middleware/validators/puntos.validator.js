@@ -52,6 +52,10 @@ const validateCreatePunto = [
 
   body('encargado')
     .optional({ checkFalsy: true })
+    .trim(),
+
+  body('url')
+    .optional({ checkFalsy: true })
     .trim()
 ];
 
@@ -95,6 +99,10 @@ const validateUpdatePunto = [
     .trim(),
 
   body('encargado')
+    .optional({ checkFalsy: true })
+    .trim(),
+
+  body('url')
     .optional({ checkFalsy: true })
     .trim()
 ];
