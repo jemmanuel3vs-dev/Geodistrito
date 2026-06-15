@@ -4,13 +4,18 @@ const multer = require('multer');
 const router = express.Router();
 
 const {
+  IMPORTS_DIR,
+  ensureDirectory
+} = require('../services/file.service');
+const {
   importExcel
 } = require('../controllers/import.controller');
 
+ensureDirectory(IMPORTS_DIR);
+
 const storage = multer.diskStorage({
 
-  destination:
-  'uploads/imports',
+  destination: IMPORTS_DIR,
 
   filename:
   (req, file, cb) => {

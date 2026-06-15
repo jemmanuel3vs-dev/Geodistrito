@@ -16,13 +16,25 @@ async function request(
 ) {
 
   const API_BASE = getApiBase();
+  const token =
+    localStorage.getItem(
+      config.storage.tokenKey
+    );
+  const headers = {
+    ...(token
+      ? { Authorization: `Bearer ${token}` }
+      : {}),
+    ...(options.headers || {})
+  };
+
   console.log('🌐 API Request:', `${API_BASE}${endpoint}`);
 
   const response =
     await fetch(
       `${API_BASE}${endpoint}`,
       {
-        ...options
+        ...options,
+        headers
       }
     );
 

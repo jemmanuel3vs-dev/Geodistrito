@@ -1,27 +1,12 @@
-const multer =
-require('multer');
-
-const path =
-require('path');
-
-const fs =
-require('fs');
+const multer = require('multer');
+const path = require('path');
+const { UPLOADS_DIR, ensureDirectory } = require('../services/file.service');
 
 /* ======================================================
    CREAR CARPETA UPLOADS SI NO EXISTE
 ====================================================== */
 
-const uploadPath =
-path.join(__dirname, '../uploads');
-
-if (!fs.existsSync(uploadPath)) {
-
-  fs.mkdirSync(
-    uploadPath,
-    { recursive: true }
-  );
-
-}
+ensureDirectory(UPLOADS_DIR);
 
 /* ======================================================
    STORAGE
@@ -30,14 +15,8 @@ if (!fs.existsSync(uploadPath)) {
 const storage =
 multer.diskStorage({
 
-  destination:
-  (req, file, cb) => {
-
-    cb(
-      null,
-      uploadPath
-    );
-
+  destination: (req, file, cb) => {
+    cb(null, UPLOADS_DIR);
   },
 
   filename:

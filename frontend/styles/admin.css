@@ -982,6 +982,73 @@ tbody tr:hover{
   gap:12px;
 }
 
+.admin-table-tools{
+  min-width:320px;
+  display:grid;
+  gap:10px;
+}
+
+.admin-table-tools input{
+  margin:0;
+}
+
+.table-action-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.table-action-buttons button,
+.pagination button{
+  width:auto;
+  padding:8px 12px;
+  border-radius:8px;
+  font-size:13px;
+}
+
+.btn-view{
+  background:#0891b2;
+  color:white;
+}
+
+.table-empty{
+  text-align:center;
+  color:var(--text-soft);
+  padding:32px;
+}
+
+.pagination{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:12px;
+  margin-top:18px;
+  color:var(--text-soft);
+}
+
+.pagination button:disabled{
+  opacity:0.45;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.admin-map-section{
+  margin-top:24px;
+}
+
+#adminMap{
+  width:100%;
+  height:420px;
+  border-radius:var(--radius);
+  overflow:hidden;
+  border:1px solid var(--border);
+}
+
+.modal-form input[readonly]{
+  opacity:0.72;
+  cursor:not-allowed;
+}
+
 .topbar-link{
   display:inline-flex;
   align-items:center;

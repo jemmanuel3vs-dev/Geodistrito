@@ -1,4 +1,79 @@
 const db = require('../database/connection');
+const { createImageUrl } = require('../services/file.service');
+
+const PUNTO_SELECT = `
+  SELECT
+    id,
+    tipo,
+    latitud AS lat,
+    longitud AS lng,
+    distrito,
+    seccion,
+    calle,
+    colonia,
+    municipio,
+    encargado,
+    url,
+    estado,
+    usuario_id,
+    created_at,
+    updated_at
+  FROM puntos
+`;
+
+function sendError(res, status, message, details = null) {
+
+  const payload = {
+    ok: false,
+    error: message
+  };
+
+  if (details) {
+    payload.details = details;
+  }
+
+  return res.status(status).json(payload);
+
+}
+
+function isValidId(id) {
+
+  return Number.isInteger(Number(id)) && Number(id) > 0;
+
+}
+
+async function findPuntoById(id) {
+
+  const [rows] = await db.execute(
+    `${PUNTO_SELECT} WHERE id = ? LIMIT 1`,
+    [id]
+  );
+
+  return rows[0] || null;
+
+}
+
+function cleanNullableText(value) {
+
+  if (value === undefined) {
+    return undefined;
+  }
+
+  const text = String(value).trim();
+
+  return text || null;
+
+}
+
+function nextTextValue(value, currentValue) {
+
+  if (value === undefined) {
+    return currentValue;
+  }
+
+  return cleanNullableText(value);
+
+}
 
 /* CREAR PUNTO */
 async function createPunto(req, res) {
@@ -35,6 +110,7 @@ async function createPunto(req, res) {
     if (!tipo || tipo.trim() === '') {
       console.log('❌ Validación fallida: falta TIPO');
       return res.status(400).json({
+        ok: false,
         error: 'El tipo de punto es obligatorio'
       });
     }
@@ -42,6 +118,7 @@ async function createPunto(req, res) {
     if (!lat || isNaN(parseFloat(lat))) {
       console.log('❌ Validación fallida: latitud inválida');
       return res.status(400).json({
+        ok: false,
         error: 'La latitud es obligatoria y debe ser un número válido'
       });
     }
@@ -49,6 +126,7 @@ async function createPunto(req, res) {
     if (!lng || isNaN(parseFloat(lng))) {
       console.log('❌ Validación fallida: longitud inválida');
       return res.status(400).json({
+        ok: false,
         error: 'La longitud es obligatoria y debe ser un número válido'
       });
     }
@@ -56,6 +134,7 @@ async function createPunto(req, res) {
    if (!distrito || distrito.trim() === '') {
   console.log('❌ Validación fallida: falta DISTRITO');
   return res.status(400).json({
+    ok: false,
     error: 'El distrito es obligatorio'
   });
 }
@@ -100,6 +179,8 @@ if (duplicados.length > 0) {
 
   return res.status(409).json({
 
+    ok: false,
+
     error:
       'Ya existe un punto similar registrado recientemente'
 
@@ -120,12 +201,9 @@ const baseUrl =
   `http://localhost:${process.env.PORT || 3000}`;
 
     const imageUrl =
-
       req.file
-
-      ? `${baseUrl}/uploads/${req.file.filename}`
-
-      : req.body.url || null;
+        ? createImageUrl(req.file.filename)
+        : req.body.url || null;
 
     // Obtener usuario_id del token (agregado en FASE 4)
     const usuarioId = req.user ? req.user.id : null;
@@ -189,12 +267,11 @@ const baseUrl =
 
     console.error('❌ Error al guardar punto:', error);
 
-    res.status(500).json({
-
-      error:
+    sendError(
+      res,
+      500,
       'Error guardando punto: ' + error.message
-
-    });
+    );
 
   }
 
@@ -206,57 +283,60 @@ async function getPuntos(req, res) {
   try {
 
     const [rows] = await db.execute(`
-
-      SELECT
-
-        id,
-
-        tipo,
-
-        latitud AS lat,
-
-        longitud AS lng,
-
-        distrito,
-
-        seccion,
-
-        calle,
-
-        colonia,
-
-        municipio,
-
-        encargado,
-
-        url,
-
-        estado,
-
-        usuario_id,
-
-        created_at,
-
-        updated_at
-
-      FROM puntos
-
+      ${PUNTO_SELECT}
       ORDER BY id DESC
-
     `);
 
-    res.json(rows);
+    res.json({
+      ok: true,
+      data: rows
+    });
 
   } catch (error) {
 
     console.error(error);
 
-    res.status(500).json({
-
-      error:
+    sendError(
+      res,
+      500,
       'Error obteniendo puntos'
+    );
 
+  }
+
+}
+
+/* OBTENER PUNTO POR ID */
+async function getPuntoById(req, res) {
+
+  try {
+
+    const { id } = req.params;
+
+    if (!isValidId(id)) {
+      return sendError(res, 400, 'ID inválido');
+    }
+
+    const punto = await findPuntoById(id);
+
+    if (!punto) {
+      return sendError(res, 404, 'Punto no encontrado');
+    }
+
+    return res.json({
+      ok: true,
+      data: punto
     });
+
+  } catch (error) {
+
+    console.error(error);
+
+    return sendError(
+      res,
+      500,
+      'Error obteniendo punto'
+    );
 
   }
 
@@ -269,11 +349,13 @@ async function updatePunto(req, res) {
 
     const { id } = req.params;
 
+    if (!isValidId(id)) {
+      return sendError(res, 400, 'ID inválido');
+    }
+
     const {
 
       tipo,
-      distrito,
-      seccion,
       calle,
       colonia,
       municipio,
@@ -281,12 +363,29 @@ async function updatePunto(req, res) {
 
     } = req.body;
 
+    const current = await findPuntoById(id);
+
+    if (!current) {
+      return sendError(res, 404, 'Punto no encontrado');
+    }
+
+    const nextTipo =
+      tipo === undefined
+      ? current.tipo
+      : String(tipo).trim();
+
+    if (!nextTipo) {
+      return sendError(
+        res,
+        400,
+        'El tipo de punto es obligatorio'
+      );
+    }
+
     const sql = `
       UPDATE puntos
       SET
         tipo = ?,
-        distrito = ?,
-        seccion = ?,
         calle = ?,
         colonia = ?,
         municipio = ?,
@@ -301,25 +400,28 @@ async function updatePunto(req, res) {
 
       [
 
-        tipo,
-        distrito,
-        seccion,
-        calle,
-        colonia,
-        municipio,
-        encargado,
+        nextTipo,
+        nextTextValue(calle, current.calle),
+        nextTextValue(colonia, current.colonia),
+        nextTextValue(municipio, current.municipio),
+        nextTextValue(encargado, current.encargado),
         id
 
       ]
 
     );
 
+    const updated = await findPuntoById(id);
+
     res.json({
 
       ok: true,
 
       message:
-      'Punto actualizado'
+      'Punto actualizado',
+
+      data:
+      updated
 
     });
 
@@ -327,12 +429,7 @@ async function updatePunto(req, res) {
 
     console.error(error);
 
-    res.status(500).json({
-
-      error:
-      'Error actualizando punto'
-
-    });
+    sendError(res, 500, 'Error actualizando punto');
 
   }
 
@@ -345,13 +442,21 @@ async function deletePunto(req, res) {
 
     const { id } = req.params;
 
-    await db.execute(
+    if (!isValidId(id)) {
+      return sendError(res, 400, 'ID inválido');
+    }
+
+    const [result] = await db.execute(
 
       'DELETE FROM puntos WHERE id = ?',
 
       [id]
 
     );
+
+    if (result.affectedRows === 0) {
+      return sendError(res, 404, 'Punto no encontrado');
+    }
 
     res.json({
 
@@ -366,12 +471,7 @@ async function deletePunto(req, res) {
 
     console.error(error);
 
-    res.status(500).json({
-
-      error:
-      'Error eliminando punto'
-
-    });
+    sendError(res, 500, 'Error eliminando punto');
 
   }
 
@@ -380,6 +480,7 @@ async function deletePunto(req, res) {
 module.exports = {
 
   getPuntos,
+  getPuntoById,
   createPunto,
   updatePunto,
   deletePunto

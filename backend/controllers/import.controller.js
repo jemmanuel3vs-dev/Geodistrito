@@ -5,6 +5,7 @@ const db = require('../database/connection');
 const {
   obtenerInformacionGeografica
 } = require('../services/geo.service');
+const { safeUnlink } = require('../services/file.service');
 
 async function importExcel(req, res) {
 
@@ -199,6 +200,8 @@ Errores: ${errores}`,
 
     });
 
+  } finally {
+    safeUnlink(req.file?.path);
   }
 
 }

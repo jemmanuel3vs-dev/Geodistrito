@@ -13,6 +13,7 @@ const handleValidationErrors = (req, res, next) => {
     console.log('Validation errors:', errors.array());
 
     return res.status(400).json({
+      ok: false,
       error: 'Validación fallida',
       details: errors.array()
     });

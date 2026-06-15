@@ -135,24 +135,46 @@
         <h2>Registros</h2>
         <p class="text-muted">Listado de puntos administrados y filtrados desde la base de datos.</p>
       </div>
+      <div class="admin-table-tools">
+        <input
+          type="search"
+          id="adminSearch"
+          placeholder="Buscar por tipo, colonia, calle o encargado"
+          autocomplete="off"
+        >
+        <span id="pointsStatus" class="text-muted">0 registros encontrados</span>
+      </div>
     </div>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
+            <th>ID</th>
             <th>Tipo</th>
             <th>Distrito</th>
             <th>Sección</th>
             <th>Municipio</th>
-            <th>Calle</th>
             <th>Colonia</th>
+            <th>Calle</th>
             <th>Encargado</th>
+            <th>Fecha</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody id="pointsBody"></tbody>
       </table>
     </div>
+    <div id="pointsPagination" class="pagination"></div>
+  </section>
+
+  <section class="admin-map-section card">
+    <div class="panel-header">
+      <div>
+        <h2>Mapa</h2>
+        <p class="text-muted">Ubicación del registro seleccionado.</p>
+      </div>
+    </div>
+    <div id="adminMap"></div>
   </section>
 </div>
 

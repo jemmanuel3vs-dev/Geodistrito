@@ -20,6 +20,7 @@ const {
 const {
 
   getPuntos,
+  getPuntoById,
   createPunto,
   updatePunto,
   deletePunto
@@ -68,6 +69,11 @@ router.get(
   getPuntos
 );
 
+router.get(
+  '/:id',
+  getPuntoById
+);
+
 /* POST */
 
 // In development (local) we allow creating puntos without auth to ease testing.
@@ -77,6 +83,12 @@ const postAuthMiddlewares = [];
 const disableAuth = process.env.NODE_ENV === 'development' || process.env.DISABLE_AUTH === 'true';
 if (!disableAuth) {
   postAuthMiddlewares.push(verifyToken, requireRole('admin', 'capturista'));
+}
+
+const adminAuthMiddlewares = [];
+
+if (!disableAuth) {
+  adminAuthMiddlewares.push(verifyToken, requireRole('admin'));
 }
 
 router.post(
@@ -94,8 +106,7 @@ router.put(
 
   '/:id',
 
-  verifyToken,
-  requireRole('admin'),
+  ...adminAuthMiddlewares,
 
   validateUpdatePunto,
   handleValidationErrors,
@@ -110,8 +121,7 @@ router.delete(
 
   '/:id',
 
-  verifyToken,
-  requireRole('admin'),
+  ...adminAuthMiddlewares,
 
   deletePunto
 

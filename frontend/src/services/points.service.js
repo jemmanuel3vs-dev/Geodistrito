@@ -2,8 +2,15 @@
 import {
   apiGet,
   apiPost,
+  apiPut,
   apiDelete
 } from './api.service.js';
+
+function unwrapData(response) {
+
+  return response?.data ?? response;
+
+}
 
 /* =========================
    GET ALL
@@ -11,9 +18,27 @@ import {
 
 export async function getAllPoints() {
 
-  return await apiGet(
+  const response = await apiGet(
     '/puntos'
   );
+
+  return unwrapData(response);
+
+}
+
+/* =========================
+   GET BY ID
+========================= */
+
+export async function getPointById(
+  id
+) {
+
+  const response = await apiGet(
+    `/puntos/${id}`
+  );
+
+  return unwrapData(response);
 
 }
 
@@ -29,6 +54,24 @@ export async function savePointRequest(
     '/puntos',
     formData
   );
+
+}
+
+/* =========================
+   UPDATE
+========================= */
+
+export async function updatePoint(
+  id,
+  data
+) {
+
+  const response = await apiPut(
+    `/puntos/${id}`,
+    data
+  );
+
+  return unwrapData(response);
 
 }
 

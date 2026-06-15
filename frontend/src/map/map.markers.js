@@ -1,64 +1,74 @@
-
 import { state } from '../core/state.js';
 
-/**
- * Establecer marcador de usuario único
- * Elimina marcador anterior si existe
- */
-export function setUserMarker(lat, lng) {
+/* =========================
+   MAP MARKERS HELPERS
+========================= */
 
-  console.log('📌 setUserMarker:', { lat, lng });
+function normalizePointLatLng(point) {
+  const lat = parseFloat(point.lat);
+  const lng = parseFloat(point.lng);
 
-  // Eliminar marcador anterior si existe
-  if (
-  state.marker &&
-  state.map.hasLayer(
-    state.marker
-  )
-) {
+  if (Number.isNaN(lat) || Number.isNaN(lng)) {
+    return null;
+  }
 
-  state.map.removeLayer(
-    state.marker
-  );
-
+  return { lat, lng };
 }
 
-  // Crear nuevo marcador
-  state.marker = L.marker(
-    [lat, lng],
-    {
-      pane: 'userPane',
-      title: 'Ubicación actual',
-      icon: L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-      })
-    }
-  ).bindPopup('📍 Tu ubicación actual').addTo(state.map);
-
-  console.log('✅ Marcador creado y agregado al mapa');
-
+function buildPopupContent(point) {
+  return `
+    <strong>${point.tipo}</strong><br>
+    Distrito: ${point.distrito}<br>
+    Sección: ${point.seccion}
+  `;
 }
 
-/**
- * Renderizar puntos guardados
- */
-export function renderPoints() {
-
-  console.log('📍 Renderizando puntos');
-
+function forEachValidPoint(callback) {
   if (!state.points?.length) {
-
-    console.warn(
-      '⚠️ No hay puntos'
-    );
-
     return;
+  }
 
+  state.points.forEach(point => {
+    const coordinates = normalizePointLatLng(point);
+
+    if (!coordinates) {
+      return;
+    }
+
+    callback(point, coordinates.lat, coordinates.lng);
+  });
+}
+
+/* =========================
+   USER LOCATION MARKER
+========================= */
+export function setUserMarker(lat, lng) {
+  if (state.marker && state.map.hasLayer(state.marker)) {
+    state.map.removeLayer(state.marker);
+  }
+
+  state.marker = L.marker([lat, lng], {
+    pane: 'userPane',
+    title: 'Ubicación actual',
+    icon: L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    })
+  })
+    .bindPopup('📍 Tu ubicación actual')
+    .addTo(state.map);
+}
+
+/* =========================
+   RENDER POINTS
+========================= */
+export function renderPoints() {
+  if (!state.points?.length) {
+    return;
   }
 
   state.savedMarkers.forEach(marker => {
@@ -67,138 +77,58 @@ export function renderPoints() {
 
   state.savedMarkers = [];
 
-  state.points.forEach(point => {
-
-    const lat =
-      parseFloat(point.lat);
-
-    const lng =
-      parseFloat(point.lng);
-
-    if (
-      isNaN(lat) ||
-      isNaN(lng)
-    ) {
-      return;
-    }
-
-    const marker =
-      L.marker([
-        lat,
-        lng
-      ],
-      {
-        pane: 'markersPane'
-      })
-      .bindPopup(`
-        <strong>${point.tipo}</strong><br>
-        Distrito: ${point.distrito}<br>
-        Sección: ${point.seccion}
-      `)
+  forEachValidPoint((point, lat, lng) => {
+    const marker = L.marker([lat, lng], {
+      pane: 'markersPane'
+    })
+      .bindPopup(buildPopupContent(point))
       .addTo(state.map);
 
-    state.savedMarkers.push(
-      marker
-    );
-
+    state.savedMarkers.push(marker);
   });
-
-  console.log(
-    `✅ ${state.savedMarkers.length} marcadores renderizados`
-  );
-
 }
 
+/* =========================
+   RENDER CLUSTERS
+========================= */
 export function renderClusters() {
-
   if (!state.points?.length) {
     return;
   }
 
   state.clusterGroup.clearLayers();
 
-  state.points.forEach(point => {
+  forEachValidPoint((point, lat, lng) => {
+    const marker = L.marker([lat, lng], {
+      pane: 'markersPane'
+    }).bindPopup(buildPopupContent(point));
 
-    const lat =
-      parseFloat(point.lat);
-
-    const lng =
-      parseFloat(point.lng);
-
-    if (
-      isNaN(lat) ||
-      isNaN(lng)
-    ) {
-      return;
-    }
-
-    const marker =
-      L.marker(
-        [lat, lng],
-        {
-          pane: 'markersPane'
-        }
-      )
-      .bindPopup(`
-        <strong>${point.tipo}</strong><br>
-        Distrito: ${point.distrito}<br>
-        Sección: ${point.seccion}
-      `);
-
-    state.clusterGroup.addLayer(
-      marker
-    );
-
+    state.clusterGroup.addLayer(marker);
   });
-
 }
 
+/* =========================
+   RENDER HEATMAP
+========================= */
 export function renderHeatmap() {
-
   if (!state.points?.length) {
     return;
   }
 
   const heatData = [];
 
-  state.points.forEach(point => {
-
-    const lat = parseFloat(point.lat);
-    const lng = parseFloat(point.lng);
-
-    if (
-      isNaN(lat) ||
-      isNaN(lng)
-    ) {
-      return;
-    }
-
-    heatData.push([
-      lat,
-      lng,
-      1
-    ]);
-
+  forEachValidPoint((point, lat, lng) => {
+    heatData.push([lat, lng, 1]);
   });
 
- if (state.heatLayer) {
+  if (state.heatLayer) {
+    state.map.removeLayer(state.heatLayer);
+    state.heatLayer = null;
+  }
 
-  state.map.removeLayer(
-    state.heatLayer
-  );
-
-  state.heatLayer = null;
-
-}
-
-  state.heatLayer =
-    L.heatLayer(
-      heatData,
-      {
-        radius: 25,
-        blur: 15,
-        maxZoom: 17
-      }
-    );
-
+  state.heatLayer = L.heatLayer(heatData, {
+    radius: 25,
+    blur: 15,
+    maxZoom: 17
+  });
 }
