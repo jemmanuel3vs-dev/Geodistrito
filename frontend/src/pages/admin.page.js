@@ -1,10 +1,17 @@
 import { importarExcel } from "../modules/import/import.js";
 import {
+    eventBus,
+    EVENTS
+} from "../core/events.js";
+import {
     getAllPoints,
     getPointById,
     updatePoint,
     deletePoint
 } from "../services/points.service.js";
+import {
+    getDashboardStats
+} from "../services/dashboard.service.js";
 import {
     preparePointForAdmin,
     filterAdminPoints,
@@ -47,7 +54,36 @@ export function initAdminPage() {
         onSave: handleSavePoint
     });
     bindAdminEvents();
+    reloadAdminData();
+
+}
+
+function reloadAdminData() {
+
+    loadAdminDashboard();
     loadAdminPoints();
+
+}
+
+async function loadAdminDashboard() {
+
+    try {
+
+        const stats =
+            await getDashboardStats();
+
+        renderAdminDashboard(
+            stats
+        );
+
+    } catch (error) {
+
+        showError(
+            error.message ||
+            "No se pudo cargar el dashboard"
+        );
+
+    }
 
 }
 
@@ -69,10 +105,6 @@ async function loadAdminPoints() {
             pointList.map(
                 preparePointForAdmin
             );
-
-        renderAdminDashboard(
-            adminState.points
-        );
 
         adminState.currentPage = 1;
 
@@ -127,6 +159,27 @@ function bindAdminEvents() {
         );
 
     document
+        .getElementById("filterSection")
+        ?.addEventListener(
+            "input",
+            applyFilters
+        );
+
+    document
+        .getElementById("filterMunicipio")
+        ?.addEventListener(
+            "input",
+            applyFilters
+        );
+
+    document
+        .getElementById("filterEncargado")
+        ?.addEventListener(
+            "input",
+            applyFilters
+        );
+
+    document
         .getElementById("btnApplyFilters")
         ?.addEventListener(
             "click",
@@ -151,7 +204,7 @@ function bindAdminEvents() {
         .getElementById("btnRefreshDashboard")
         ?.addEventListener(
             "click",
-            loadAdminPoints
+            reloadAdminData
         );
 
     bindTableEvents({
@@ -170,6 +223,11 @@ function bindAdminEvents() {
         applyAdminFilters();
 
     });
+
+    eventBus.on(
+        EVENTS.POINT_SAVED,
+        reloadAdminData
+    );
 
 }
 
@@ -248,9 +306,7 @@ async function handleSavePoint(
 
         });
 
-    renderAdminDashboard(
-        adminState.points
-    );
+    loadAdminDashboard();
 
     applyAdminFilters();
 
@@ -283,9 +339,7 @@ async function handleDeletePoint(id) {
                 item => Number(item.id) !== Number(id)
             );
 
-        renderAdminDashboard(
-            adminState.points
-        );
+        loadAdminDashboard();
 
         applyAdminFilters();
 
@@ -507,11 +561,13 @@ function initImportModal() {
         }
     );
 
-    document
+document
 .getElementById("confirmImport")
 ?.addEventListener(
     "click",
-    importarExcel
+    () => importarExcel({
+        onSuccess: reloadAdminData
+    })
 );
 
 }

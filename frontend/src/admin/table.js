@@ -1,29 +1,8 @@
+import { isImageUrl } from '../utils/media.js';
+
 function text(value) {
 
   return value ?? '-';
-
-}
-
-function formatDate(value) {
-
-  if (!value) {
-    return '-';
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return '-';
-  }
-
-  return date.toLocaleDateString(
-    'es-MX',
-    {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    }
-  );
 
 }
 
@@ -36,6 +15,31 @@ function appendCell(row, value) {
     text(value);
 
   row.appendChild(cell);
+
+}
+
+function createImageCell(point) {
+
+  const cell =
+    document.createElement('td');
+
+  if (!isImageUrl(point.url)) {
+    cell.textContent = 'Sin imagen';
+    cell.className = 'table-image-empty';
+    return cell;
+  }
+
+  const image =
+    document.createElement('img');
+
+  image.src = point.url;
+  image.alt = `Imagen del punto ${point.id}`;
+  image.className = 'table-thumbnail';
+  image.loading = 'lazy';
+
+  cell.appendChild(image);
+
+  return cell;
 
 }
 
@@ -180,11 +184,11 @@ export function renderPointsTable({
     appendCell(row, point.tipo);
     appendCell(row, point.distrito);
     appendCell(row, point.seccion);
-    appendCell(row, point.municipio);
     appendCell(row, point.colonia);
     appendCell(row, point.calle);
     appendCell(row, point.encargado);
-    appendCell(row, formatDate(point.created_at));
+    appendCell(row, point.municipio);
+    row.appendChild(createImageCell(point));
     row.appendChild(createActionsCell(point));
 
     fragment.appendChild(row);

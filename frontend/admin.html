@@ -24,30 +24,77 @@
   </header>
 
   <section class="kpi-grid" id="dashboardRoot">
-    <article class="kpi-card">
-      <span>Total puntos</span>
+    <article class="kpi-card metric-total">
+      <div class="kpi-card-top">
+        <span class="kpi-icon">T</span>
+        <span>Total de puntos</span>
+      </div>
       <strong id="kpiTotalPoints">0</strong>
     </article>
-    <article class="kpi-card">
-      <span>Total distritos</span>
-      <strong id="kpiDistricts">0</strong>
+    <article class="kpi-card metric-bardas">
+      <div class="kpi-card-top">
+        <span class="kpi-icon">B</span>
+        <span>Bardas</span>
+      </div>
+      <strong id="kpiBardas">0</strong>
     </article>
-    <article class="kpi-card">
-      <span>Total secciones</span>
-      <strong id="kpiSections">0</strong>
+    <article class="kpi-card metric-lonas">
+      <div class="kpi-card-top">
+        <span class="kpi-icon">L</span>
+        <span>Lonas</span>
+      </div>
+      <strong id="kpiLonas">0</strong>
     </article>
-    <article class="kpi-card">
-      <span>Total municipios</span>
-      <strong id="kpiMunicipalities">0</strong>
+    <article class="kpi-card metric-espectaculares">
+      <div class="kpi-card-top">
+        <span class="kpi-icon">E</span>
+        <span>Espectaculares</span>
+      </div>
+      <strong id="kpiEspectaculares">0</strong>
     </article>
-    <article class="kpi-card">
-      <span>Total comités</span>
-      <strong id="kpiComites">0</strong>
+    <article class="kpi-card metric-vehiculos">
+      <div class="kpi-card-top">
+        <span class="kpi-icon">V</span>
+        <span>Vehículos</span>
+      </div>
+      <strong id="kpiVehiculos">0</strong>
     </article>
-    <article class="kpi-card">
-      <span>Usuarios activos</span>
-      <strong id="kpiActiveUsers">0</strong>
-    </article>
+  </section>
+
+  <section class="district-dashboard">
+    <div class="section-heading">
+      <div>
+        <h2>Estadísticas por distrito</h2>
+        <p class="text-muted">Distribución de puntos por distrito local.</p>
+      </div>
+    </div>
+    <div class="district-grid" id="districtDashboard">
+      <article class="district-card">
+        <span>Distrito 20</span>
+        <strong id="district20Total">0</strong>
+        <small id="district20Percent">0%</small>
+      </article>
+      <article class="district-card">
+        <span>Distrito 21</span>
+        <strong id="district21Total">0</strong>
+        <small id="district21Percent">0%</small>
+      </article>
+      <article class="district-card">
+        <span>Distrito 22</span>
+        <strong id="district22Total">0</strong>
+        <small id="district22Percent">0%</small>
+      </article>
+      <article class="district-card">
+        <span>Distrito 23</span>
+        <strong id="district23Total">0</strong>
+        <small id="district23Percent">0%</small>
+      </article>
+      <article class="district-card">
+        <span>Distrito 24</span>
+        <strong id="district24Total">0</strong>
+        <small id="district24Percent">0%</small>
+      </article>
+    </div>
   </section>
 
   <section class="panel-row">
@@ -63,6 +110,8 @@
             <option value="all">Todos</option>
             <option value="bardas">Bardas</option>
             <option value="lonas">Lonas</option>
+            <option value="espectaculares">Espectaculares</option>
+            <option value="vehiculos">Vehículos</option>
             <option value="comites">Comités</option>
             <option value="casillas">Casillas</option>
           </select>
@@ -102,13 +151,7 @@
     </div>
   </section>
 
-  <section class="charts-section">
-    <article class="chart-card">
-      <div class="chart-card-header">
-        <h3>Puntos por distrito</h3>
-      </div>
-      <canvas id="chartByDistrict"></canvas>
-    </article>
+  <section class="charts-section dashboard-charts">
     <article class="chart-card">
       <div class="chart-card-header">
         <h3>Puntos por tipo</h3>
@@ -117,15 +160,9 @@
     </article>
     <article class="chart-card">
       <div class="chart-card-header">
-        <h3>Actividad por fecha</h3>
+        <h3>Distribución por distrito</h3>
       </div>
-      <canvas id="chartActivity"></canvas>
-    </article>
-    <article class="chart-card">
-      <div class="chart-card-header">
-        <h3>Puntos por municipio</h3>
-      </div>
-      <canvas id="chartByMunicipality"></canvas>
+      <canvas id="chartByDistrict"></canvas>
     </article>
   </section>
 
@@ -153,11 +190,11 @@
             <th>Tipo</th>
             <th>Distrito</th>
             <th>Sección</th>
-            <th>Municipio</th>
             <th>Colonia</th>
             <th>Calle</th>
             <th>Encargado</th>
-            <th>Fecha</th>
+            <th>Municipio</th>
+            <th>Imagen</th>
             <th>Acciones</th>
           </tr>
         </thead>

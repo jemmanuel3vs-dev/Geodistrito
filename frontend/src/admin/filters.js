@@ -1,8 +1,11 @@
 const SEARCH_FIELDS = [
   'tipo',
+  'distrito',
+  'seccion',
   'colonia',
   'calle',
-  'encargado'
+  'encargado',
+  'municipio'
 ];
 
 export const PAGE_SIZE = 20;
@@ -37,6 +40,9 @@ export function filterAdminPoints(
   const search = normalize(filters.search);
   const tipo = normalize(filters.tipo);
   const distrito = normalize(filters.distrito);
+  const seccion = normalize(filters.seccion);
+  const municipio = normalize(filters.municipio);
+  const encargado = normalize(filters.encargado);
 
   return points.filter(point => {
 
@@ -53,10 +59,25 @@ export function filterAdminPoints(
       !distrito ||
       normalize(point.distrito) === distrito;
 
+    const matchesSeccion =
+      !seccion ||
+      normalize(point.seccion) === seccion;
+
+    const matchesMunicipio =
+      !municipio ||
+      normalize(point.municipio).includes(municipio);
+
+    const matchesEncargado =
+      !encargado ||
+      normalize(point.encargado).includes(encargado);
+
     return (
       matchesSearch &&
       matchesTipo &&
-      matchesDistrito
+      matchesDistrito &&
+      matchesSeccion &&
+      matchesMunicipio &&
+      matchesEncargado
     );
 
   });
@@ -106,6 +127,15 @@ export function getAdminFilters() {
         ?.value || 'all',
     distrito:
       document.getElementById('filterDistrict')
+        ?.value || '',
+    seccion:
+      document.getElementById('filterSection')
+        ?.value || '',
+    municipio:
+      document.getElementById('filterMunicipio')
+        ?.value || '',
+    encargado:
+      document.getElementById('filterEncargado')
         ?.value || ''
   };
 
@@ -122,6 +152,15 @@ export function clearAdminFilters() {
   const district =
     document.getElementById('filterDistrict');
 
+  const section =
+    document.getElementById('filterSection');
+
+  const municipality =
+    document.getElementById('filterMunicipio');
+
+  const manager =
+    document.getElementById('filterEncargado');
+
   if (search) {
     search.value = '';
   }
@@ -132,6 +171,18 @@ export function clearAdminFilters() {
 
   if (district) {
     district.value = '';
+  }
+
+  if (section) {
+    section.value = '';
+  }
+
+  if (municipality) {
+    municipality.value = '';
+  }
+
+  if (manager) {
+    manager.value = '';
   }
 
 }

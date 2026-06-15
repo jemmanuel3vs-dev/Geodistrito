@@ -1,6 +1,8 @@
 import { uploadExcel } from "../../services/import.service.js";
 
-export async function importarExcel() {
+export async function importarExcel({
+    onSuccess
+} = {}) {
 
     const input = document.getElementById("excelFile");
 
@@ -14,29 +16,18 @@ export async function importarExcel() {
 
     try {
 
-        const response = await uploadExcel(formData);
-
-        if (!response.ok) {
-
-            const texto = await response.text();
-
-            console.error("Respuesta del servidor:", texto);
-
-            throw new Error(texto);
-
-        }
-
-        const data = await response.json();
-
-        console.log("Respuesta del servidor:", data);
+        const data = await uploadExcel(formData);
 
         alert(data.message);
 
         document.getElementById("excelModal").style.display = "none";
+        input.value = "";
+        document.getElementById("selectedFile").textContent =
+            "Ningún archivo seleccionado";
+
+        await onSuccess?.(data);
 
     } catch (e) {
-
-        console.error("ERROR:", e);
 
         alert(e.message);
 

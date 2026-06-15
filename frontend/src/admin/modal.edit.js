@@ -1,6 +1,7 @@
 import {
   showError
 } from '../ui/toast.js';
+import { isImageUrl } from '../utils/media.js';
 
 let currentPoint = null;
 let saveHandler = null;
@@ -28,6 +29,8 @@ function ensureModal() {
         <select id="editTipo" name="tipo" required>
           <option value="bardas">Bardas</option>
           <option value="lonas">Lonas</option>
+          <option value="espectaculares">Espectaculares</option>
+          <option value="vehiculos">Vehículos</option>
           <option value="comites">Comités</option>
           <option value="casillas">Casillas</option>
         </select>
@@ -49,6 +52,12 @@ function ensureModal() {
 
         <label for="editMunicipio">Municipio</label>
         <input id="editMunicipio" name="municipio" type="text">
+
+        <label for="editUrl">URL</label>
+        <input id="editUrl" name="url" type="text" placeholder="https://...">
+        <div id="editImagePreview" class="edit-image-preview">
+          Sin imagen
+        </div>
 
         <div class="modal-actions">
           <button type="button" class="btn-secondary-outline" data-close-edit>
@@ -76,6 +85,35 @@ function setValue(id, value) {
   if (input) {
     input.value = value ?? '';
   }
+
+}
+
+function setImagePreview(value) {
+
+  const preview =
+    document.getElementById('editImagePreview');
+
+  if (!preview) {
+    return;
+  }
+
+  preview.innerHTML = '';
+
+  if (!isImageUrl(value)) {
+    preview.textContent = 'Sin imagen';
+    preview.className = 'edit-image-preview empty';
+    return;
+  }
+
+  const image =
+    document.createElement('img');
+
+  image.src = value;
+  image.alt = 'Imagen actual del punto';
+  image.className = 'edit-image-thumbnail';
+
+  preview.className = 'edit-image-preview';
+  preview.appendChild(image);
 
 }
 
@@ -122,6 +160,12 @@ export function initEditPointModal({
   });
 
   modal
+    .querySelector('#editUrl')
+    ?.addEventListener('input', event => {
+      setImagePreview(event.target.value.trim());
+    });
+
+  modal
     .querySelector('#editPointForm')
     ?.addEventListener('submit', async event => {
 
@@ -139,7 +183,8 @@ export function initEditPointModal({
         encargado: formData.get('encargado'),
         calle: formData.get('calle'),
         colonia: formData.get('colonia'),
-        municipio: formData.get('municipio')
+        municipio: formData.get('municipio'),
+        url: formData.get('url')
       };
 
       try {
@@ -184,6 +229,8 @@ export function openEditPointModal(point) {
   setValue('editCalle', point.calle);
   setValue('editColonia', point.colonia);
   setValue('editMunicipio', point.municipio);
+  setValue('editUrl', point.url);
+  setImagePreview(point.url);
 
   modal.classList.add('open');
 

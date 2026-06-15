@@ -5,6 +5,10 @@ import {
   apiPut,
   apiDelete
 } from './api.service.js';
+import {
+  eventBus,
+  EVENTS
+} from '../core/events.js';
 
 function unwrapData(response) {
 
@@ -50,10 +54,17 @@ export async function savePointRequest(
   formData
 ) {
 
-  return await apiPost(
+  const response = await apiPost(
     '/puntos',
     formData
   );
+
+  eventBus.emit(
+    EVENTS.POINT_SAVED,
+    response
+  );
+
+  return response;
 
 }
 

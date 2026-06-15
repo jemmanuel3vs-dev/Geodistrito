@@ -27,8 +27,6 @@ async function request(
     ...(options.headers || {})
   };
 
-  console.log('🌐 API Request:', `${API_BASE}${endpoint}`);
-
   const response =
     await fetch(
       `${API_BASE}${endpoint}`,
