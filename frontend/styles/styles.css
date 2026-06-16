@@ -1107,8 +1107,17 @@ tbody tr:hover{
 }
 
 .chart-card canvas{
-  flex:1;
-  min-height:260px;
+  display:block;
+  width:100%;
+  height:100%;
+}
+
+.chart-wrapper{
+  position:relative;
+  width:100%;
+  height:350px;
+  max-height:350px;
+  overflow:hidden;
 }
 
 .text-muted{
