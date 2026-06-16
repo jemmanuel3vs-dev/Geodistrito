@@ -1,8 +1,8 @@
 const TYPE_KEYS = [
   'bardas',
   'lonas',
-  'espectaculares',
-  'vehiculos'
+  'comites',
+  'casillas'
 ];
 
 const DISTRICT_KEYS = [
@@ -16,8 +16,8 @@ const DISTRICT_KEYS = [
 const TYPE_LABELS = {
   bardas: 'Bardas',
   lonas: 'Lonas',
-  espectaculares: 'Espectaculares',
-  vehiculos: 'Vehículos'
+  comites: 'Comités',
+  casillas: 'Casillas'
 };
 
 const TYPE_COLORS = [
@@ -35,6 +35,13 @@ const DISTRICT_COLORS = [
   '#fb7185'
 ];
 
+const KPI_MAP = {
+  bardas: 'kpiBardas',
+  lonas: 'kpiLonas',
+  comites: 'kpiComites',
+  casillas: 'kpiCasillas'
+};
+
 const charts = {
   type: null,
   district: null
@@ -45,28 +52,20 @@ function toNumber(value) {
 }
 
 function setText(id, value) {
-  const element =
-    document.getElementById(id);
-
+  const element = document.getElementById(id);
   if (element) {
     element.textContent = value;
   }
 }
 
 function formatPercent(value, total) {
-  if (!total) {
-    return '0%';
-  }
-
+  if (!total) return '0%';
   return `${((value / total) * 100).toFixed(1)}%`;
 }
 
 function normalizeDashboard(stats = {}) {
-  const tipos =
-    stats.tipos || {};
-
-  const distritos =
-    stats.distritos || {};
+  const tipos = stats.tipos || {};
+  const distritos = stats.distritos || {};
 
   return {
     total: toNumber(stats.total),
@@ -87,83 +86,68 @@ function getChartOptions() {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        labels: {
-          color: '#f8fafc'
-        }
+        labels: { color: '#f8fafc' }
       }
     },
     scales: {
       x: {
-        ticks: {
-          color: '#94a3b8'
-        },
-        grid: {
-          color: 'rgba(148,163,184,0.12)'
-        }
+        ticks: { color: '#94a3b8' },
+        grid: { color: 'rgba(148,163,184,0.12)' }
       },
       y: {
         beginAtZero: true,
-        ticks: {
-          color: '#94a3b8',
-          precision: 0
-        },
-        grid: {
-          color: 'rgba(148,163,184,0.12)'
-        }
+        ticks: { color: '#94a3b8', precision: 0 },
+        grid: { color: 'rgba(148,163,184,0.12)' }
       }
     }
   };
 }
 
 function renderTypeChart(data) {
-  const canvas =
-    document.getElementById('chartByType');
+  const canvas = document.getElementById('chartByType');
 
-  if (!canvas || typeof Chart === 'undefined') {
-    return;
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  if (charts.type) {
+    charts.type.destroy();
+    charts.type = null;
   }
-
-  charts.type?.destroy();
 
   charts.type = new Chart(canvas, {
     type: 'bar',
     data: {
       labels: TYPE_KEYS.map(key => TYPE_LABELS[key]),
-      datasets: [
-        {
-          label: 'Puntos',
-          data: TYPE_KEYS.map(key => data.tipos[key]),
-          backgroundColor: TYPE_COLORS,
-          borderRadius: 8
-        }
-      ]
+      datasets: [{
+        label: 'Puntos',
+        data: TYPE_KEYS.map(key => data.tipos[key]),
+        backgroundColor: TYPE_COLORS,
+        borderRadius: 8
+      }]
     },
     options: getChartOptions()
   });
 }
 
 function renderDistrictChart(data) {
-  const canvas =
-    document.getElementById('chartByDistrict');
+  const canvas = document.getElementById('chartByDistrict');
 
-  if (!canvas || typeof Chart === 'undefined') {
-    return;
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  if (charts.district) {
+    charts.district.destroy();
+    charts.district = null;
   }
-
-  charts.district?.destroy();
 
   charts.district = new Chart(canvas, {
     type: 'pie',
     data: {
       labels: DISTRICT_KEYS.map(key => `Distrito ${key}`),
-      datasets: [
-        {
-          data: DISTRICT_KEYS.map(key => data.distritos[key]),
-          backgroundColor: DISTRICT_COLORS,
-          borderColor: '#0f172a',
-          borderWidth: 2
-        }
-      ]
+      datasets: [{
+        data: DISTRICT_KEYS.map(key => data.distritos[key]),
+        backgroundColor: DISTRICT_COLORS,
+        borderColor: '#0f172a',
+        borderWidth: 2
+      }]
     },
     options: {
       responsive: true,
@@ -171,9 +155,7 @@ function renderDistrictChart(data) {
       plugins: {
         legend: {
           position: 'bottom',
-          labels: {
-            color: '#f8fafc'
-          }
+          labels: { color: '#f8fafc' }
         }
       }
     }
@@ -182,37 +164,25 @@ function renderDistrictChart(data) {
 
 function renderDistrictCards(data) {
   DISTRICT_KEYS.forEach(key => {
-    const total =
-      data.distritos[key];
-
-    setText(
-      `district${key}Total`,
-      total
-    );
-
-    setText(
-      `district${key}Percent`,
-      formatPercent(total, data.total)
-    );
+    const total = data.distritos[key];
+    setText(`district${key}Total`, total);
+    setText(`district${key}Percent`, formatPercent(total, data.total));
   });
 }
 
 export function renderAdminDashboard(stats) {
-  const data =
-    normalizeDashboard(stats);
+  const data = normalizeDashboard(stats);
 
   setText('kpiTotalPoints', data.total);
-  setText('kpiBardas', data.tipos.bardas);
-  setText('kpiLonas', data.tipos.lonas);
-  setText('kpiEspectaculares', data.tipos.espectaculares);
-  setText('kpiVehiculos', data.tipos.vehiculos);
+
+  // Render each type KPI using the correct element IDs
+  Object.entries(KPI_MAP).forEach(([key, elementId]) => {
+    setText(elementId, data.tipos[key]);
+  });
 
   renderDistrictCards(data);
   renderTypeChart(data);
   renderDistrictChart(data);
 
-  setText(
-    'dashboardUpdated',
-    `Última actualización: ${new Date().toLocaleString('es-MX')}`
-  );
+  setText('dashboardUpdated', `Última actualización: ${new Date().toLocaleString('es-MX')}`);
 }

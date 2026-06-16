@@ -1,6 +1,12 @@
-import { isAuthenticated, login } from '../core/auth.js';
+import { isAuthenticated, login } from '../services/auth.service.js';
 
-function initLoginPage() {
+function showLoginMessage(element, text, type = 'error') {
+  if (!element) return;
+  element.textContent = text;
+  element.className = `login-message ${type}`;
+}
+
+export function initLogin() {
   if (isAuthenticated()) {
     window.location.href = 'admin.html';
     return;
@@ -18,7 +24,7 @@ function initLoginPage() {
     const password = document.getElementById('password')?.value.trim();
 
     if (!email || !password) {
-      showLoginMessage('Completa email y contraseña', 'error');
+      showLoginMessage(message, 'Completa email y contraseña', 'error');
       return;
     }
 
@@ -27,16 +33,12 @@ function initLoginPage() {
       window.location.href = 'admin.html';
     } catch (error) {
       console.error(error);
-      showLoginMessage(error.message || 'Error de conexión', 'error');
+      showLoginMessage(message, error.message || 'Error de conexión', 'error');
     }
   });
-
-  function showLoginMessage(text, type = 'error') {
-    if (message) {
-      message.textContent = text;
-      message.className = `login-message ${type}`;
-    }
-  }
 }
 
-document.addEventListener('DOMContentLoaded', initLoginPage);
+// Auto-init when loaded directly (login.html loads this file standalone)
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => initLogin());
+}

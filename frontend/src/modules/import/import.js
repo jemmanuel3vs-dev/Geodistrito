@@ -1,13 +1,11 @@
 import { uploadExcel } from "../../services/import.service.js";
+import { showError, showSuccess } from "../../ui/toast.js";
 
-export async function importarExcel({
-    onSuccess
-} = {}) {
-
+export async function importarExcel({ onSuccess } = {}) {
     const input = document.getElementById("excelFile");
 
     if (!input.files.length) {
-        alert("Selecciona un archivo.");
+        showError("Selecciona un archivo.");
         return;
     }
 
@@ -15,22 +13,16 @@ export async function importarExcel({
     formData.append("excel", input.files[0]);
 
     try {
-
         const data = await uploadExcel(formData);
 
-        alert(data.message);
+        showSuccess(data.message || "Importación completada");
 
         document.getElementById("excelModal").style.display = "none";
         input.value = "";
-        document.getElementById("selectedFile").textContent =
-            "Ningún archivo seleccionado";
+        document.getElementById("selectedFile").textContent = "Ningún archivo seleccionado";
 
         await onSuccess?.(data);
-
     } catch (e) {
-
-        alert(e.message);
-
+        showError(e.message || "Error al importar");
     }
-
 }

@@ -1,5 +1,5 @@
 import {
-  showError
+    showError
 } from '../ui/toast.js';
 import { isImageUrl } from '../utils/media.js';
 
@@ -21,7 +21,7 @@ function ensureModal() {
   modal.id = 'editPointModal';
   modal.className = 'modal-overlay';
 
-  modal.innerHTML = `
+      modal.innerHTML = `
     <div class="modal-card">
       <h2>Editar punto</h2>
       <form id="editPointForm" class="modal-form">
@@ -29,8 +29,6 @@ function ensureModal() {
         <select id="editTipo" name="tipo" required>
           <option value="bardas">Bardas</option>
           <option value="lonas">Lonas</option>
-          <option value="espectaculares">Espectaculares</option>
-          <option value="vehiculos">Vehículos</option>
           <option value="comites">Comités</option>
           <option value="casillas">Casillas</option>
         </select>

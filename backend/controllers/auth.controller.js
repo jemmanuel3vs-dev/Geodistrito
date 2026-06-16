@@ -75,7 +75,7 @@ async function login(req, res) {
       rol: user.rol
     };
 
-    const token = jwt.sign(payload, JWT_SECRET, {
+const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '12h'
     });
 

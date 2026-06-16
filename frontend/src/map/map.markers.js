@@ -30,11 +30,7 @@ function forEachValidPoint(callback) {
 
   state.points.forEach(point => {
     const coordinates = normalizePointLatLng(point);
-
-    if (!coordinates) {
-      return;
-    }
-
+    if (!coordinates) return;
     callback(point, coordinates.lat, coordinates.lng);
   });
 }
@@ -67,9 +63,7 @@ export function setUserMarker(lat, lng) {
    RENDER POINTS
 ========================= */
 export function renderPoints() {
-  if (!state.points?.length) {
-    return;
-  }
+  if (!state.points?.length) return;
 
   state.savedMarkers.forEach(marker => {
     state.map.removeLayer(marker);
@@ -92,16 +86,13 @@ export function renderPoints() {
    RENDER CLUSTERS
 ========================= */
 export function renderClusters() {
-  if (!state.points?.length) {
-    return;
-  }
+  if (!state.points?.length) return;
 
   state.clusterGroup.clearLayers();
 
   forEachValidPoint((point, lat, lng) => {
-    const marker = L.marker([lat, lng], {
-      pane: 'markersPane'
-    }).bindPopup(buildPopupContent(point));
+    const marker = L.marker([lat, lng], { pane: 'markersPane' })
+      .bindPopup(buildPopupContent(point));
 
     state.clusterGroup.addLayer(marker);
   });
@@ -111,9 +102,7 @@ export function renderClusters() {
    RENDER HEATMAP
 ========================= */
 export function renderHeatmap() {
-  if (!state.points?.length) {
-    return;
-  }
+  if (!state.points?.length) return;
 
   const heatData = [];
 

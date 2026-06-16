@@ -1,6 +1,3 @@
-
-import { state } from '../core/state.js';
-
 export function createBaseMap() {
 
   const map = L.map('map').setView(

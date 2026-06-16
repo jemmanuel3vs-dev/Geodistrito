@@ -1,25 +1,13 @@
 import { state } from '../core/state.js';
-
-import { getAllPoints }
-from '../services/points.service.js';
-
+import { getAllPoints } from '../services/points.service.js';
 import {
   locateUser,
   locateFromLink
 } from './map.geolocation.js';
-
 import {
   createBaseMap
 } from './map.layers.js';
-
-import {
-  loadSections
-} from './map.sections.js';
-
-import {
-  loadDistricts
-} from './map.districts.js';
-
+import { loadSections } from './map.sections.js';
 import {
   renderPoints,
   renderClusters,
@@ -31,24 +19,15 @@ import {
 ========================= */
 
 export function initMap() {
-
-  state.map =
-    createBaseMap();
-
+  state.map = createBaseMap();
 }
 
 /* =========================
    INIT LAYERS
 ========================= */
 export function initLayers() {
-
-  state.clusterGroup =
-    L.markerClusterGroup();
-
-  console.log(
-    '🗺️ Layers inicializadas'
-  );
-
+  state.clusterGroup = L.markerClusterGroup();
+  console.log('🗺️ Layers inicializadas');
 }
 
 /* =========================
@@ -56,21 +35,13 @@ export function initLayers() {
 ========================= */
 
 export async function loadPoints() {
-
   try {
-
-    const points =
-      await getAllPoints();
-
+    const points = await getAllPoints();
     state.points = points;
     state.puntos = points;
-
-  } catch(error){
-
+  } catch (error) {
     console.error(error);
-
   }
-
 }
 
 /* =========================
@@ -78,89 +49,41 @@ export async function loadPoints() {
 ========================= */
 
 export function renderMapOverlay() {
-
-  console.log(
-    '🎨 Overlay renderizado'
-  );
-
+  console.log('🎨 Overlay renderizado');
 }
 
 export function setMapMode(mode) {
-
-  console.log(
-    `🗺️ Cambiando vista a: ${mode}`
-  );
-
+  console.log(`🗺️ Cambiando vista a: ${mode}`);
   state.mapMode = mode;
 
-  // Limpiar marcadores normales
+  // Cleanup existing layers
   state.savedMarkers.forEach(marker => {
-
-    if (
-      state.map.hasLayer(marker)
-    ) {
-
+    if (state.map.hasLayer(marker)) {
       state.map.removeLayer(marker);
-
     }
-
   });
 
-  // Limpiar clusters
-  if (
-    state.clusterGroup &&
-    state.map.hasLayer(
-      state.clusterGroup
-    )
-  ) {
-
-    state.map.removeLayer(
-      state.clusterGroup
-    );
-
+  if (state.clusterGroup && state.map.hasLayer(state.clusterGroup)) {
+    state.map.removeLayer(state.clusterGroup);
   }
 
-  if (
-  state.heatLayer &&
-  state.map.hasLayer(
-    state.heatLayer
-  )
-) {
+  if (state.heatLayer && state.map.hasLayer(state.heatLayer)) {
+    state.map.removeLayer(state.heatLayer);
+  }
 
-  state.map.removeLayer(
-    state.heatLayer
-  );
-
+  switch (mode) {
+    case 'markers':
+      renderPoints();
+      break;
+    case 'clusters':
+      renderClusters();
+      state.map.addLayer(state.clusterGroup);
+      break;
+    case 'heat':
+      renderHeatmap();
+      state.map.addLayer(state.heatLayer);
+      break;
+  }
 }
 
-  switch(mode){
-
-  case 'markers':
-    renderPoints();
-    break;
-
-  case 'clusters':
-    renderClusters();
-    state.map.addLayer(
-      state.clusterGroup
-    );
-    break;
-
-  case 'heat':
-    renderHeatmap();
-    state.map.addLayer(
-      state.heatLayer
-    );
-    break;
-
-}
-
-}
-
-export {
-  loadSections,
-  loadDistricts,
-  locateUser,
-  locateFromLink
-};
-
+export { loadSections, locateUser, locateFromLink };

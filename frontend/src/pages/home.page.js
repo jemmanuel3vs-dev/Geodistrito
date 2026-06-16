@@ -30,42 +30,28 @@ let saving = false;
 
 export async function initHome() {
 
-  console.log(
-    '🏠 Inicializando Home'
-  );
+  console.log('🏠 Inicializando Home');
 
   try {
 
     initMap();
-
     initLayers();
-
     await loadSections();
-
     await loadColonias();
-
     await loadPoints();
 
-    setMapMode(
-  'markers'
-);
-showColonias();
+    setMapMode('markers');
+    showColonias();
 
     renderMapOverlay();
-
     setupEvents();
 
-    console.log(
-      '✅ Home lista'
-    );
+    console.log('✅ Home lista');
 
   } catch (error) {
 
     console.error(error);
-
-    showError(
-      'Error inicializando Home'
-    );
+    showError('Error inicializando Home');
 
   }
 
@@ -74,105 +60,42 @@ showColonias();
 function setupEvents() {
 
   if (eventsInitialized) {
-
-    console.warn(
-      '⚠️ Eventos ya inicializados'
-    );
-
+    console.warn('⚠️ Eventos ya inicializados');
     return;
-
   }
 
   eventsInitialized = true;
 
-  const btnMapHeat =
-    document.getElementById(
-      'btnMapHeat'
-    );
+  const btnMapHeat = document.getElementById('btnMapHeat');
+  const btnMapMarkers = document.getElementById('btnMapMarkers');
+  const btnMapClusters = document.getElementById('btnMapClusters');
+  const btnLoadLink = document.getElementById('btnLoadLink');
+  const btnLocate = document.getElementById('btnLocate');
+  const btnSave = document.getElementById('btnSave');
 
-  const btnMapMarkers =
-    document.getElementById(
-      'btnMapMarkers'
-    );
-
-  const btnMapClusters =
-    document.getElementById(
-      'btnMapClusters'
-    );
-
-  const btnLoadLink =
-    document.getElementById(
-      'btnLoadLink'
-    );
-
-  const btnLocate =
-    document.getElementById(
-      'btnLocate'
-    );
-
-  const btnSave =
-    document.getElementById(
-      'btnSave'
-    );
-
-  btnLocate?.addEventListener(
-    'click',
-    locateUser
-  );
-
-  btnSave?.addEventListener(
-    'click',
-    savePoint
-  );
-
-  btnLoadLink?.addEventListener(
-    'click',
-    locateFromLink
-  );
-
-  btnMapMarkers?.addEventListener(
-    'click',
-    () => setMapMode('markers')
-  );
-
-  btnMapClusters?.addEventListener(
-    'click',
-    () => setMapMode('clusters')
-  );
-
-  btnMapHeat?.addEventListener(
-    'click',
-    () => setMapMode('heat')
-  );
+  btnLocate?.addEventListener('click', locateUser);
+  btnSave?.addEventListener('click', savePoint);
+  btnLoadLink?.addEventListener('click', locateFromLink);
+  btnMapMarkers?.addEventListener('click', () => setMapMode('markers'));
+  btnMapClusters?.addEventListener('click', () => setMapMode('clusters'));
+  btnMapHeat?.addEventListener('click', () => setMapMode('heat'));
 
 }
 
 async function savePoint() {
 
   if (saving) {
-
-    console.warn(
-      '⚠️ Guardado en progreso'
-    );
-
+    console.warn('⚠️ Guardado en progreso');
     return;
-
   }
 
   saving = true;
 
-  const btnSave =
-    document.getElementById(
-      'btnSave'
-    );
+  const btnSave = document.getElementById('btnSave');
 
   if (btnSave) {
-
     btnSave.disabled = true;
-
-    btnSave.textContent =
-      'Guardando...';
-
+    btnSave.textContent = 'Guardando...';
   }
 
   try {
@@ -190,9 +113,7 @@ async function savePoint() {
     const municipio = document.getElementById('municipio')?.textContent;
     const encargado = document.getElementById('encargado')?.value;
 
-    console.log('📦 Datos recolectados:', {
-      tipo, lat, lng, distrito, seccion, calle, colonia, municipio, encargado
-    });
+    console.log('📦 Datos recolectados:', { tipo, lat, lng, distrito, seccion, calle, colonia, municipio, encargado });
 
     // Validar campos obligatorios
     if (!tipo || !tipo.trim()) {
@@ -242,37 +163,22 @@ async function savePoint() {
     document.getElementById('imagePreview').style.display = 'none';
     document.getElementById('encargado').value = '';
 
-    } catch (error) {
+  } catch (error) {
 
-    console.error(
-      '❌ Error guardando punto:',
-      error
-    );
-
-    showError(
-      error.message ||
-      'Error guardando punto'
-    );
+    console.error('❌ Error guardando punto:', error);
+    showError(error.message || 'Error guardando punto');
 
   } finally {
 
     saving = false;
 
-    const btnSave =
-      document.getElementById(
-        'btnSave'
-      );
+    const btnSave = document.getElementById('btnSave');
 
     if (btnSave) {
-
       btnSave.disabled = false;
-
-      btnSave.textContent =
-        'Guardar Punto';
-
+      btnSave.textContent = 'Guardar Punto';
     }
 
   }
 
 }
-

@@ -59,12 +59,6 @@ export async function loadColonias() {
 
         coloniasLayer.addTo(state.map);
 
-coloniasLayer.eachLayer(layer => {
-
-    layer.bringToFront();
-
-});
-
         console.log(
             "Colonias cargadas:",
             geojson.features.length

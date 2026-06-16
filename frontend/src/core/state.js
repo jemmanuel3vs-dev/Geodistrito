@@ -4,30 +4,32 @@
 
 export const state = {
 
-  // Authentication / user
+  // Usuario / autenticación
   usuario: null,
   token: null,
 
-  // Map objects (Spanish aliases requested)
+  // Mapa
   mapa: null,
-  marker: null,
-
-  // Legacy/compat names (kept for backwards compatibility)
   map: null,
+  marker: null,
   circle: null,
+  currentLocation: null,
+
+  // Capas de secciones
   sectionsLayer: null,
   nearestSectionLayer: null,
   sectionCentroids: [],
   savedMarkers: [],
-  currentLocation: null,
+  clusterGroup: null,
+  heatLayer: null,
 
-  // Points and filters (Spanish aliases + legacy names)
+  // Puntos (ambos nombres para compatibilidad)
   puntos: [],
   points: [],
   filteredPuntos: [],
   filteredPoints: [],
 
-  // Filters
+  // Filtros (ambos nombres para compatibilidad)
   filtros: {
     tipo: 'all',
     distrito: '',
@@ -35,7 +37,6 @@ export const state = {
     municipio: '',
     encargado: ''
   },
-
   filters: {
     tipo: 'all',
     distrito: '',
@@ -44,12 +45,11 @@ export const state = {
     encargado: ''
   },
 
+  // Modo de visualización del mapa
   mapMode: 'markers',
-  clusterGroup: null,
-  heatLayer: null,
 
+  // Capas Leaflet por tipo
   layers: {
-    // Leaflet layer groups must be created after Leaflet and map initialization.
     bardas: null,
     lonas: null,
     comites: null,
@@ -59,93 +59,48 @@ export const state = {
 };
 
 /* =========================
-   HELPERS
+   HELPERS — mantener sincronización español/inglés
 ========================= */
 
-function setPoints(points){
-
-  // keep both english and spanish keys in sync
+export function setPuntos(points) {
   state.points = points;
   state.puntos = points;
-
   state.filteredPoints = points;
   state.filteredPuntos = points;
-
 }
 
-function addPointToState(point){
-
+export function addPunto(point) {
   state.points.push(point);
   state.puntos.push(point);
-
   state.filteredPoints.push(point);
   state.filteredPuntos.push(point);
-
 }
 
-function resetFiltersState(){
-
-  const defaultFilters = {
-    tipo: 'all',
-    distrito: '',
-    seccion: '',
-    municipio: '',
-    encargado: ''
-  };
-
-  state.filters = Object.assign({}, defaultFilters);
-  state.filtros = Object.assign({}, defaultFilters);
-  state.filters = Object.assign({}, defaultFilters);
-
+export function setFiltros(f) {
+  const synced = { tipo: 'all', distrito: '', seccion: '', municipio: '', encargado: '', ...f };
+  state.filtros = { ...synced };
+  state.filters = { ...synced };
 }
 
-/* -------------------------
-   New small API helpers
-   ------------------------- */
+export function resetFilters() {
+  const defaults = { tipo: 'all', distrito: '', seccion: '', municipio: '', encargado: '' };
+  state.filtros = { ...defaults };
+  state.filters = { ...defaults };
+}
 
-function setUsuario(user){
+export function setUsuario(user) {
   state.usuario = user;
 }
 
-function getUsuario(){
+export function getUsuario() {
   return state.usuario;
 }
 
-function setMapa(m){
+export function setMapa(m) {
   state.mapa = m;
-  state.map = m; // backward compat
+  state.map = m;
 }
 
-function getMapa(){
+export function getMapa() {
   return state.mapa || state.map;
-}
-
-function setMarker(m){
-  state.marker = m;
-  state.marker = m;
-}
-
-function getMarker(){
-  return state.marker;
-}
-
-function setFiltros(f){
-  state.filtros = Object.assign({}, f);
-  state.filters = Object.assign({}, f);
-}
-
-function getFiltros(){
-  return state.filtros;
-}
-
-function setPuntos(arr){
-  setPoints(arr);
-}
-
-function getPuntos(){
-  return state.puntos;
-}
-
-if (typeof window !== 'undefined') {
-  window.state = state;
 }
