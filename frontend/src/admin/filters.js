@@ -41,6 +41,7 @@ export function filterAdminPoints(
   const tipo = normalize(filters.tipo);
   const distrito = normalize(filters.distrito);
   const seccion = normalize(filters.seccion);
+  const colonia = normalize(filters.colonia);
   const municipio = normalize(filters.municipio);
   const encargado = normalize(filters.encargado);
 
@@ -63,6 +64,10 @@ export function filterAdminPoints(
       !seccion ||
       normalize(point.seccion) === seccion;
 
+    const matchesColonia =
+      !colonia ||
+      normalize(point.colonia).includes(colonia);
+
     const matchesMunicipio =
       !municipio ||
       normalize(point.municipio).includes(municipio);
@@ -76,6 +81,7 @@ export function filterAdminPoints(
       matchesTipo &&
       matchesDistrito &&
       matchesSeccion &&
+      matchesColonia &&
       matchesMunicipio &&
       matchesEncargado
     );
@@ -131,6 +137,9 @@ export function getAdminFilters() {
     seccion:
       document.getElementById('filterSection')
         ?.value || '',
+    colonia:
+      document.getElementById('filterColonia')
+        ?.value || '',
     municipio:
       document.getElementById('filterMunicipio')
         ?.value || '',
@@ -155,6 +164,9 @@ export function clearAdminFilters() {
   const section =
     document.getElementById('filterSection');
 
+  const neighborhood =
+    document.getElementById('filterColonia');
+
   const municipality =
     document.getElementById('filterMunicipio');
 
@@ -175,6 +187,10 @@ export function clearAdminFilters() {
 
   if (section) {
     section.value = '';
+  }
+
+  if (neighborhood) {
+    neighborhood.value = '';
   }
 
   if (municipality) {

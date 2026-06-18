@@ -3,14 +3,14 @@ const { body } = require('express-validator');
 const tiposPermitidos = [
   'bardas',
   'lonas',
-  'comites',
+  'espectaculares',
   'vehiculos',
   'comites',
   'casillas'
 ];
 
 const tiposPermitidosMensaje =
-  'Tipo inválido. Opciones: bardas, lonas, comites, vehiculos, comites, casillas';
+  'Tipo inválido. Opciones: bardas, lonas, espectaculares, vehiculos, comites, casillas';
 
 const validateCreatePunto = [
   body('tipo')

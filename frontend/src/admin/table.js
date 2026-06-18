@@ -1,7 +1,6 @@
 import { isImageUrl } from '../utils/media.js';
 
 let sortConfig = { column: null, direction: 'asc' };
-let currentData = { rows: [], total: 0, page: 1, totalPages: 1 };
 
 function text(value) {
   return value ?? '-';
@@ -57,6 +56,25 @@ function createActionsCell(point) {
   return cell;
 }
 
+function createPointRow(point) {
+  const row = document.createElement('tr');
+
+  row.dataset.id = point.id;
+
+  appendCell(row, point.id);
+  appendCell(row, point.tipo);
+  appendCell(row, point.distrito);
+  appendCell(row, point.seccion);
+  appendCell(row, point.colonia);
+  appendCell(row, point.calle);
+  appendCell(row, point.encargado);
+  appendCell(row, point.municipio);
+  row.appendChild(createImageCell(point));
+  row.appendChild(createActionsCell(point));
+
+  return row;
+}
+
 function renderEmptyRow(message) {
   const body = document.getElementById('pointsBody');
   if (!body) return;
@@ -64,7 +82,7 @@ function renderEmptyRow(message) {
   body.innerHTML = '';
   const row = document.createElement('tr');
   const cell = document.createElement('td');
-  cell.colSpan = 11;
+  cell.colSpan = 10;
   cell.className = 'table-empty';
   cell.textContent = message;
   row.appendChild(cell);
@@ -110,8 +128,6 @@ function updateSortIndicators(sortedColumn, direction) {
 }
 
 export function renderPointsTable({ rows, total, page, totalPages }) {
-  currentData = { rows, total, page, totalPages };
-
   const body = document.getElementById('pointsBody');
   const status = document.getElementById('pointsStatus');
 
@@ -129,20 +145,9 @@ export function renderPointsTable({ rows, total, page, totalPages }) {
   const fragment = document.createDocumentFragment();
 
   rows.forEach(point => {
-    const row = document.createElement('tr');
-
-    appendCell(row, point.id);
-    appendCell(row, point.tipo);
-    appendCell(row, point.distrito);
-    appendCell(row, point.seccion);
-    appendCell(row, point.colonia);
-    appendCell(row, point.calle);
-    appendCell(row, point.encargado);
-    appendCell(row, point.municipio);
-    row.appendChild(createImageCell(point));
-    row.appendChild(createActionsCell(point));
-
-    fragment.appendChild(row);
+    fragment.appendChild(
+      createPointRow(point)
+    );
   });
 
   body.appendChild(fragment);
@@ -196,7 +201,6 @@ function onSortClick(column, callback) {
 
 export function bindSortHeaders(onSort) {
   const headers = document.querySelectorAll('thead th');
-  const sortable = new Set(SORT_COLUMNS);
 
   headers.forEach((th, index) => {
     const column = SORT_COLUMNS[index];
@@ -214,6 +218,23 @@ export function bindSortHeaders(onSort) {
 export function applySorting(points, config = sortConfig) {
   if (!config.column) return points;
   return sortPoints(points, config.column, config.direction);
+}
+
+export function updatePointRow(point) {
+  const row =
+    document.querySelector(
+      `#pointsBody tr[data-id="${point.id}"]`
+    );
+
+  if (!row) {
+    return false;
+  }
+
+  row.replaceWith(
+    createPointRow(point)
+  );
+
+  return true;
 }
 
 export function resetSort() {

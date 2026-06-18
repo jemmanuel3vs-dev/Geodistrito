@@ -322,6 +322,8 @@ async function updatePunto(req, res) {
     const {
 
       tipo,
+      distrito,
+      seccion,
       calle,
       colonia,
       municipio,
@@ -349,10 +351,17 @@ async function updatePunto(req, res) {
       );
     }
 
+    // Si se subió una imagen nueva, usarla; si no, mantener el valor actual
+    const nextUrl = req.file
+      ? createImageUrl(req.file.filename)
+      : nextTextValue(url, current.url);
+
     const sql = `
       UPDATE puntos
       SET
         tipo = ?,
+        distrito = ?,
+        seccion = ?,
         calle = ?,
         colonia = ?,
         municipio = ?,
@@ -369,11 +378,13 @@ async function updatePunto(req, res) {
       [
 
         nextTipo,
+        nextTextValue(distrito, current.distrito),
+        nextTextValue(seccion, current.seccion),
         nextTextValue(calle, current.calle),
         nextTextValue(colonia, current.colonia),
         nextTextValue(municipio, current.municipio),
         nextTextValue(encargado, current.encargado),
-        nextTextValue(url, current.url),
+        nextUrl,
         id
 
       ]

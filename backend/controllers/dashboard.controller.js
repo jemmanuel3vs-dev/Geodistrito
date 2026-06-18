@@ -6,6 +6,8 @@ const DEFAULT_DASHBOARD = {
     bardas: 0,
     lonas: 0,
     comites: 0,
+    casillas: 0,
+    espectaculares: 0,
     vehiculos: 0
   },
   distritos: {
@@ -23,7 +25,9 @@ const DASHBOARD_QUERY = `
     SUM(CASE WHEN LOWER(TRIM(tipo)) = 'bardas' THEN 1 ELSE 0 END) AS bardas,
     SUM(CASE WHEN LOWER(TRIM(tipo)) = 'lonas' THEN 1 ELSE 0 END) AS lonas,
     SUM(CASE WHEN LOWER(TRIM(tipo)) = 'comites' THEN 1 ELSE 0 END) AS comites,
-    SUM(CASE WHEN LOWER(TRIM(tipo)) IN ('vehiculos', 'casillas') THEN 1 ELSE 0 END) AS vehiculos,
+    SUM(CASE WHEN LOWER(TRIM(tipo)) = 'casillas' THEN 1 ELSE 0 END) AS casillas,
+    SUM(CASE WHEN LOWER(TRIM(tipo)) = 'espectaculares' THEN 1 ELSE 0 END) AS espectaculares,
+    SUM(CASE WHEN LOWER(TRIM(tipo)) IN ('vehiculos', 'vehículos') THEN 1 ELSE 0 END) AS vehiculos,
     SUM(CASE WHEN TRIM(REPLACE(LOWER(COALESCE(distrito, '')), 'distrito', '')) = '20' THEN 1 ELSE 0 END) AS distrito_20,
     SUM(CASE WHEN TRIM(REPLACE(LOWER(COALESCE(distrito, '')), 'distrito', '')) = '21' THEN 1 ELSE 0 END) AS distrito_21,
     SUM(CASE WHEN TRIM(REPLACE(LOWER(COALESCE(distrito, '')), 'distrito', '')) = '22' THEN 1 ELSE 0 END) AS distrito_22,
@@ -43,6 +47,8 @@ function formatDashboardRow(row = {}) {
       bardas: toNumber(row.bardas),
       lonas: toNumber(row.lonas),
       comites: toNumber(row.comites),
+      casillas: toNumber(row.casillas),
+      espectaculares: toNumber(row.espectaculares),
       vehiculos: toNumber(row.vehiculos)
     },
     distritos: {

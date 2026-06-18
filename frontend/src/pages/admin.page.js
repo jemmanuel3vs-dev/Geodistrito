@@ -1,26 +1,28 @@
-import { importarExcel } from "../modules/import/import.js";
-import { eventBus, EVENTS } from "../core/events.js";
-import { getAllPoints, getPointById, updatePoint, deletePoint } from "../services/points.service.js";
-import { getDashboardStats } from "../services/dashboard.service.js";
+import { renderAdminDashboard } from "../admin/dashboard.js";
 import {
-    preparePointForAdmin,
+    clearAdminFilters,
     filterAdminPoints,
-    paginateAdminPoints,
     getAdminFilters,
-    clearAdminFilters
+    paginateAdminPoints,
+    preparePointForAdmin
 } from "../admin/filters.js";
+import { initEditPointModal, openEditPointModal } from "../admin/modal.edit.js";
 import {
-    renderTableLoading,
-    renderPointsTable,
-    bindTableEvents,
+    applySorting,
     bindPaginationEvents,
     bindSortHeaders,
-    applySorting,
-    resetSort
+    bindTableEvents,
+    renderPointsTable,
+    renderTableLoading,
+    resetSort,
+    updatePointRow
 } from "../admin/table.js";
-import { initEditPointModal, openEditPointModal } from "../admin/modal.edit.js";
-import { renderAdminDashboard } from "../admin/dashboard.js";
-import { showError, showSuccess, showInfo } from "../ui/toast.js";
+import { eventBus, EVENTS } from "../core/events.js";
+import { importarExcel } from "../modules/import/import.js";
+import { getDashboardStats } from "../services/dashboard.service.js";
+import { deletePoint, getAllPoints, getPointById, updatePoint } from "../services/points.service.js";
+import { showError, showInfo, showSuccess } from "../ui/toast.js";
+
 
 const adminState = {
     points: [],
@@ -62,9 +64,12 @@ async function loadAdminPoints() {
         const pointList = Array.isArray(points) ? points : [];
 
         adminState.points = pointList.map(preparePointForAdmin);
-        adminState.currentPage = 1;
-        adminState.currentSort = { column: null, direction: 'asc' };
-        resetSort();
+
+        // Preserve current page, sort, and filters when reloading
+        // Only reset page to 1 on initial load (when there are no existing points)
+        if (!adminState.points.length) {
+            adminState.currentPage = 1;
+        }
 
         applyAdminFilters();
     } catch (error) {
@@ -84,6 +89,7 @@ function bindAdminEvents() {
     document.getElementById("filterType")?.addEventListener("change", applyFilters);
     document.getElementById("filterDistrict")?.addEventListener("input", applyFilters);
     document.getElementById("filterSection")?.addEventListener("input", applyFilters);
+    document.getElementById("filterColonia")?.addEventListener("input", applyFilters);
     document.getElementById("filterMunicipio")?.addEventListener("input", applyFilters);
     document.getElementById("filterEncargado")?.addEventListener("input", applyFilters);
 
@@ -102,6 +108,11 @@ function bindAdminEvents() {
 
     document.getElementById("btnRefreshDashboard")?.addEventListener("click", reloadAdminData);
 
+    // Export buttons
+    document.getElementById("btnExportExcel")?.addEventListener("click", exportToExcel);
+    document.getElementById("btnExportCsv")?.addEventListener("click", exportToCsv);
+    document.getElementById("btnExportGeoJson")?.addEventListener("click", exportToGeoJson);
+
     bindTableEvents({
         view: handleViewPoint,
         edit: handleEditPoint,
@@ -119,7 +130,9 @@ function bindAdminEvents() {
         applyAdminFilters();
     });
 
-    eventBus.on(EVENTS.POINT_SAVED, reloadAdminData);
+    eventBus.on(EVENTS.POINT_SAVED, () => {
+        reloadAdminData();
+    });
 }
 
 function applyAdminFilters() {
@@ -142,6 +155,113 @@ function applyAdminFilters() {
     });
 }
 
+/* =========================
+   EXPORT FUNCTIONS
+========================= */
+
+function exportToExcel() {
+    if (!adminState.filteredPoints.length) {
+        showError("No hay datos para exportar");
+        return;
+    }
+
+    if (typeof XLSX === 'undefined') {
+        showError("Librería XLSX no disponible");
+        return;
+    }
+
+    const data = adminState.filteredPoints.map((p, i) => ({
+        '#': i + 1,
+        ID: p.id,
+        Tipo: p.tipo,
+        Distrito: p.distrito,
+        Sección: p.seccion,
+        Colonia: p.colonia,
+        Calle: p.calle,
+        Encargado: p.encargado,
+        Municipio: p.municipio,
+        URL: p.url,
+        Latitud: p.lat,
+        Longitud: p.lng
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Puntos');
+    XLSX.writeFile(wb, `geodistrito_puntos_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+    showSuccess(`Exportados ${data.length} registros a Excel`);
+}
+
+function exportToCsv() {
+    if (!adminState.filteredPoints.length) {
+        showError("No hay datos para exportar");
+        return;
+    }
+
+    const headers = '#,ID,Tipo,Distrito,Sección,Colonia,Calle,Encargado,Municipio,URL,Latitud,Longitud';
+    const rows = adminState.filteredPoints.map((p, i) =>
+        [i + 1, p.id, p.tipo, p.distrito, p.seccion, p.colonia, p.calle, p.encargado, p.municipio, p.url, p.lat, p.lng]
+            .map(v => `"${v ?? ''}"`).join(',')
+    );
+
+    const csv = [headers, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `geodistrito_puntos_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+
+    showSuccess(`Exportados ${rows.length} registros a CSV`);
+}
+
+function exportToGeoJson() {
+    if (!adminState.filteredPoints.length) {
+        showError("No hay datos para exportar");
+        return;
+    }
+
+    const features = adminState.filteredPoints
+        .filter(p => p.lat && p.lng)
+        .map(p => ({
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [parseFloat(p.lng), parseFloat(p.lat)]
+            },
+            properties: {
+                id: p.id,
+                tipo: p.tipo,
+                distrito: p.distrito,
+                seccion: p.seccion,
+                colonia: p.colonia,
+                calle: p.calle,
+                encargado: p.encargado,
+                municipio: p.municipio,
+                url: p.url
+            }
+        }));
+
+    const geojson = {
+        type: 'FeatureCollection',
+        features
+    };
+
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `geodistrito_puntos_${new Date().toISOString().slice(0, 10)}.geojson`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+
+    showSuccess(`Exportados ${features.length} puntos a GeoJSON`);
+}
+
+/* =========================
+   EDIT
+========================= */
+
 async function handleEditPoint(id) {
     try {
         const point = await getPointById(id);
@@ -153,14 +273,34 @@ async function handleEditPoint(id) {
 
 async function handleSavePoint(id, payload) {
     const updated = await updatePoint(id, payload);
+    const updatedPoint = preparePointForAdmin(updated);
+    const filters = getAdminFilters();
+    const previousPoint = adminState.points.find(point => Number(point.id) === Number(id));
 
     adminState.points = adminState.points.map(point => {
         if (Number(point.id) !== Number(id)) return point;
-        return preparePointForAdmin(updated);
+        return updatedPoint;
     });
 
     loadAdminDashboard();
-    applyAdminFilters();
+
+    const stayedVisible =
+        previousPoint &&
+        !adminState.currentSort.column &&
+        filterAdminPoints([previousPoint], filters).length === 1 &&
+        filterAdminPoints([updatedPoint], filters).length === 1 &&
+        updatePointRow(updatedPoint);
+
+    if (!stayedVisible) {
+        applyAdminFilters();
+    } else {
+        adminState.filteredPoints = adminState.filteredPoints.map(point =>
+            Number(point.id) === Number(id)
+                ? updatedPoint
+                : point
+        );
+    }
+
     showSuccess("Punto actualizado correctamente");
 }
 
@@ -175,10 +315,10 @@ function initDeleteConfirmModal() {
     modal.id = 'deleteConfirmModal';
     modal.className = 'modal-overlay';
     modal.innerHTML = `
-        <div class="modal-card" style="max-width:400px;text-align:center;">
-            <h3>¿Eliminar punto?</h3>
-            <p style="color:var(--text-soft);margin:16px 0;">Esta acción no se puede deshacer.</p>
-            <div class="modal-actions" style="justify-content:center;">
+        <div class="modal-card delete-modal-card">
+            <h3>¿Deseas eliminar este punto?</h3>
+            <p class="delete-modal-copy">Esta acción no se puede deshacer.</p>
+            <div class="modal-actions delete-modal-actions">
                 <button type="button" class="btn-secondary-outline" data-cancel-delete>Cancelar</button>
                 <button type="button" class="btn-danger" data-confirm-delete>Eliminar</button>
             </div>
@@ -194,6 +334,11 @@ function initDeleteConfirmModal() {
     modal.querySelector('[data-confirm-delete]').addEventListener('click', () => {
         closeDeleteConfirm();
         if (deleteConfirmCallback) deleteConfirmCallback();
+    });
+
+    // ESC closes delete modal
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeDeleteConfirm();
     });
 }
 
@@ -211,8 +356,6 @@ function closeDeleteConfirm() {
 }
 
 async function handleDeletePoint(id) {
-    const point = adminState.points.find(p => Number(p.id) === Number(id));
-
     openDeleteConfirm(async () => {
         try {
             await deletePoint(id);
@@ -336,6 +479,13 @@ function initImportModal() {
     });
 
     document.getElementById("confirmImport")?.addEventListener("click", () =>
-        importarExcel({ onSuccess: reloadAdminData })
+        importarExcel({ onSuccess: () => reloadAdminData() })
     );
+
+    // ESC closes import modal
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal.style.display === 'block') {
+            modal.style.display = 'none';
+        }
+    });
 }

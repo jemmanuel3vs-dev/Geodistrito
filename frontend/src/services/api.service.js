@@ -56,6 +56,13 @@ export function apiPost(endpoint, body) {
 ========================= */
 
 export function apiPut(endpoint, body) {
+  if (body instanceof FormData) {
+    return request(endpoint, {
+      method: 'PUT',
+      body
+    });
+  }
+
   return request(endpoint, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

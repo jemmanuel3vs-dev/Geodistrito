@@ -102,7 +102,7 @@ router.put(
   '/:id',
 
   ...adminAuthMiddlewares,
-
+  upload.single('image'),
   validateUpdatePunto,
   handleValidationErrors,
 
