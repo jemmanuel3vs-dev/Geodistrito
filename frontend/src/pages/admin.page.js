@@ -23,6 +23,15 @@ import { getDashboardStats } from "../services/dashboard.service.js";
 import { deletePoint, getAllPoints, getPointById, updatePoint } from "../services/points.service.js";
 import { showError, showInfo, showSuccess } from "../ui/toast.js";
 
+import {
+   isAuthenticated,
+   getUser,
+   isAdmin
+} from '../services/auth.service.js';
+
+import {
+  initHeader
+} from '../components/header.js';
 
 const adminState = {
     points: [],
@@ -33,13 +42,26 @@ const adminState = {
     tempMarker: null
 };
 
-export function initAdminPage() {
-    initImportModal();
-    initAdminMap();
-    initEditPointModal({ onSave: handleSavePoint });
-    initDeleteConfirmModal();
-    bindAdminEvents();
-    reloadAdminData();
+export async function initAdminPage() {
+  if (!isAuthenticated()) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const user = getUser();
+  if (!user || !isAdmin()) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  initHeader();
+
+  initImportModal();
+  initAdminMap();
+  initEditPointModal({ onSave: handleSavePoint });
+  initDeleteConfirmModal();
+  bindAdminEvents();
+  reloadAdminData();
 }
 
 function reloadAdminData() {
@@ -65,8 +87,6 @@ async function loadAdminPoints() {
 
         adminState.points = pointList.map(preparePointForAdmin);
 
-        // Preserve current page, sort, and filters when reloading
-        // Only reset page to 1 on initial load (when there are no existing points)
         if (!adminState.points.length) {
             adminState.currentPage = 1;
         }
@@ -108,7 +128,6 @@ function bindAdminEvents() {
 
     document.getElementById("btnRefreshDashboard")?.addEventListener("click", reloadAdminData);
 
-    // Export buttons
     document.getElementById("btnExportExcel")?.addEventListener("click", exportToExcel);
     document.getElementById("btnExportCsv")?.addEventListener("click", exportToCsv);
     document.getElementById("btnExportGeoJson")?.addEventListener("click", exportToGeoJson);
@@ -124,7 +143,6 @@ function bindAdminEvents() {
         applyAdminFilters();
     });
 
-    // Column sorting
     bindSortHeaders(sortConfig => {
         adminState.currentSort = sortConfig;
         applyAdminFilters();
@@ -140,7 +158,6 @@ function applyAdminFilters() {
 
     adminState.filteredPoints = filterAdminPoints(adminState.points, filters);
 
-    // Apply sorting then pagination
     const sorted = applySorting(adminState.filteredPoints, adminState.currentSort);
 
     const pagination = paginateAdminPoints(sorted, adminState.currentPage);
@@ -154,10 +171,6 @@ function applyAdminFilters() {
         totalPages: pagination.totalPages
     });
 }
-
-/* =========================
-   EXPORT FUNCTIONS
-========================= */
 
 function exportToExcel() {
     if (!adminState.filteredPoints.length) {
@@ -258,10 +271,6 @@ function exportToGeoJson() {
     showSuccess(`Exportados ${features.length} puntos a GeoJSON`);
 }
 
-/* =========================
-   EDIT
-========================= */
-
 async function handleEditPoint(id) {
     try {
         const point = await getPointById(id);
@@ -304,10 +313,6 @@ async function handleSavePoint(id, payload) {
     showSuccess("Punto actualizado correctamente");
 }
 
-/* =========================
-   DELETE CONFIRM MODAL
-========================= */
-
 let deleteConfirmCallback = null;
 
 function initDeleteConfirmModal() {
@@ -324,7 +329,6 @@ function initDeleteConfirmModal() {
             </div>
         </div>
     `;
-
     document.body.appendChild(modal);
 
     modal.querySelector('[data-cancel-delete]').addEventListener('click', closeDeleteConfirm);
@@ -336,7 +340,6 @@ function initDeleteConfirmModal() {
         if (deleteConfirmCallback) deleteConfirmCallback();
     });
 
-    // ESC closes delete modal
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') closeDeleteConfirm();
     });
@@ -359,9 +362,7 @@ async function handleDeletePoint(id) {
     openDeleteConfirm(async () => {
         try {
             await deletePoint(id);
-
             adminState.points = adminState.points.filter(item => Number(item.id) !== Number(id));
-
             loadAdminDashboard();
             applyAdminFilters();
             showSuccess("Punto eliminado correctamente");
@@ -371,13 +372,8 @@ async function handleDeletePoint(id) {
     });
 }
 
-/* =========================
-   VIEW POINT ON MAP
-========================= */
-
 function handleViewPoint(id) {
     const point = adminState.points.find(p => Number(p.id) === Number(id));
-
     if (!point) {
         showError("Punto no encontrado");
         return;
@@ -385,7 +381,6 @@ function handleViewPoint(id) {
 
     const lat = Number(point.lat);
     const lng = Number(point.lng);
-
     if (Number.isNaN(lat) || Number.isNaN(lng)) {
         showError("El punto no tiene coordenadas válidas");
         return;
@@ -398,11 +393,9 @@ function handleViewPoint(id) {
     }
 
     map.setView([lat, lng], 16);
-
     if (adminState.tempMarker) {
         map.removeLayer(adminState.tempMarker);
     }
-
     adminState.tempMarker = L.marker([lat, lng])
         .addTo(map)
         .bindPopup(createPointPopup(point))
@@ -418,7 +411,6 @@ function handleViewPoint(id) {
 
 function initAdminMap() {
     if (adminState.map) return adminState.map;
-
     const container = document.getElementById("adminMap");
     if (!container || typeof L === "undefined") return null;
 
@@ -432,12 +424,11 @@ function initAdminMap() {
 }
 
 function createPointPopup(point) {
-    const esc = value => {
+    const esc = (value) => {
         const div = document.createElement("div");
         div.textContent = value ?? "-";
         return div.innerHTML;
     };
-
     return `
         <div class="popup-card">
             <h3>${esc(point.tipo)}</h3>
@@ -482,7 +473,6 @@ function initImportModal() {
         importarExcel({ onSuccess: () => reloadAdminData() })
     );
 
-    // ESC closes import modal
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && modal.style.display === 'block') {
             modal.style.display = 'none';

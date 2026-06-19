@@ -25,15 +25,36 @@ import {
 
 import { state } from '../core/state.js';
 
+import {
+  initHeader
+} from '../components/header.js';
+
+import {
+   isAuthenticated,
+   getUser
+} from '../services/auth.service.js';
+
 let eventsInitialized = false;
 let saving = false;
 
 export async function initHome() {
 
+  if (!isAuthenticated()) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const user = getUser();
+  if (!user) {
+    window.location.href = 'login.html';
+    return;
+  }
+
   console.log('🏠 Inicializando Home');
 
-  try {
+  initHeader();
 
+  try {
     initMap();
     initLayers();
     await loadSections();
@@ -47,14 +68,10 @@ export async function initHome() {
     setupEvents();
 
     console.log('✅ Home lista');
-
   } catch (error) {
-
     console.error(error);
     showError('Error inicializando Home');
-
   }
-
 }
 
 function setupEvents() {

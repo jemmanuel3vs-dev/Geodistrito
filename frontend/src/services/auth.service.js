@@ -1,44 +1,150 @@
-/**
- * Auth Service
- * Autenticación y gestión de tokens
- */
+import { config } from '../core/config.js';
 
+const TOKEN_KEY = config.storage.tokenKey;
+const USER_KEY = config.storage.userKey;
+
+/* =========================
+   LOGIN
+========================= */
 
 export async function login(email, password) {
-  console.log('🔐 Login:', email);
-  // TODO: Implementar en FASE 3
+
+  const response = await fetch(
+    'http://localhost:3000/api/auth/login',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        password
+      })
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+
+    throw new Error(
+      data.error || 'Error de autenticación'
+    );
+
+  }
+
+  setSession(
+    data.token,
+    data.user
+  );
+
+  return data;
+
 }
 
-export function logout() {
-  console.log('🚪 Logout');
-  // TODO: Implementar en FASE 3
+/* =========================
+   SESSION
+========================= */
+
+export function setSession(
+  token,
+  user
+) {
+
+  localStorage.setItem(
+    TOKEN_KEY,
+    token
+  );
+
+  localStorage.setItem(
+    USER_KEY,
+    JSON.stringify(user)
+  );
+
 }
+
+/* =========================
+   TOKEN
+========================= */
 
 export function getToken() {
-  // TODO: Implementar en FASE 3
-  return null;
+
+  return localStorage.getItem(
+    TOKEN_KEY
+  );
+
 }
+
+/* =========================
+   USER
+========================= */
+
+export function getUser() {
+
+  const user =
+    localStorage.getItem(
+      USER_KEY
+    );
+
+  return user
+    ? JSON.parse(user)
+    : null;
+
+}
+
+/* =========================
+   AUTH
+========================= */
 
 export function isAuthenticated() {
-  // TODO: Implementar en FASE 3
-  return false;
+
+  return !!getToken();
+
 }
 
-export function setSession(token, user) {
-  console.log('✅ Sesión establecida');
-  // TODO: Implementar en FASE 3
+/* =========================
+   ROLE
+========================= */
+
+export function isAdmin() {
+
+  const user =
+    getUser();
+
+  return user?.rol === 'admin';
+
 }
 
-export function authHeaders() {
-  const token = getToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+/* =========================
+   HEADERS
+========================= */
+
+export function getAuthHeaders() {
+
+  const token =
+    getToken();
+
+  return token
+    ? {
+        Authorization:
+          `Bearer ${token}`
+      }
+    : {};
+
 }
 
-export default {
-  login,
-  logout,
-  getToken,
-  isAuthenticated,
-  setSession,
-  authHeaders
-};
+/* =========================
+   LOGOUT
+========================= */
+
+export function logout() {
+
+  localStorage.removeItem(
+    TOKEN_KEY
+  );
+
+  localStorage.removeItem(
+    USER_KEY
+  );
+
+}

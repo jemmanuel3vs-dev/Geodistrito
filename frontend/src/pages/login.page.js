@@ -1,4 +1,4 @@
-import { isAuthenticated, login } from '../services/auth.service.js';
+import { isAuthenticated, login, getUser } from '../services/auth.service.js';
 
 function showLoginMessage(element, text, type = 'error') {
   if (!element) return;
@@ -8,7 +8,12 @@ function showLoginMessage(element, text, type = 'error') {
 
 export function initLogin() {
   if (isAuthenticated()) {
-    window.location.href = 'admin.html';
+    const user = getUser();
+    if (user?.rol === 'admin') {
+      window.location.href = 'admin.html';
+    } else {
+      window.location.href = 'index.html';
+    }
     return;
   }
 
@@ -30,7 +35,12 @@ export function initLogin() {
 
     try {
       await login(email, password);
-      window.location.href = 'admin.html';
+      const user = getUser();
+      if (user?.rol === 'admin') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'index.html';
+      }
     } catch (error) {
       console.error(error);
       showLoginMessage(message, error.message || 'Error de conexión', 'error');

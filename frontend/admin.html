@@ -9,19 +9,27 @@
 </head>
 <body>
 <div class="app-container">
-  <header class="topbar">
-    <div class="topbar-left">
-      <div>
-        <p class="eyebrow">Plataforma GIS Administrativa</p>
-        <h1>GeoDistrito Dashboard</h1>
-        <p class="subtitle">Visualiza estadísticas reales, administra registros y monitorea actividad geográfica desde una sola vista.</p>
-      </div>
-      <div class="topbar-actions">
-        <button id="btnRefreshDashboard" class="btn-primary">Actualizar</button>
-        <a href="index.html" class="topbar-link">Ir al mapa</a>
-      </div>
+  <div class="app-header">
+    <div class="header-brand">
+      <span class="header-logo">📍</span>
+      <span class="header-title">GeoDistrito</span>
     </div>
-  </header>
+    <nav class="header-nav">
+      <a
+    id="homeLink"
+    href="index.html"
+    class="topbar-link"
+>
+    Ir al mapa
+</a>
+      <span id="currentUser" class="user-badge">Invitado</span>
+      <button id="btnLogout" class="logout-btn">Cerrar sesión</button>
+    </nav>
+  </div>
+
+  <div class="topbar-actions">
+    <button id="btnRefreshDashboard" class="btn-primary">Actualizar</button>
+  </div>
 
   <section class="kpi-grid" id="dashboardRoot">
     <article class="kpi-card metric-total">
@@ -110,8 +118,6 @@
             <option value="all">Todos</option>
             <option value="bardas">Bardas</option>
             <option value="lonas">Lonas</option>
-            <option value="espectaculares">Espectaculares</option>
-            <option value="vehiculos">Vehículos</option>
             <option value="comites">Comités</option>
             <option value="casillas">Casillas</option>
           </select>
@@ -239,7 +245,7 @@
 
             <h2>
 
-                📄 Importar Excel
+                Importar Excel
 
             </h2>
 
@@ -290,7 +296,7 @@
             <button
                 id="confirmImport">
 
-                📤 Importar
+                Importar
 
             </button>
 
