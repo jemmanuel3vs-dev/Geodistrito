@@ -1,19 +1,19 @@
 {
   "env": {
     "browser": true,
-    "es2021": true,
-    "node": true
+    "node": true,
+    "es2021": true
   },
   "extends": [
-    "next/core-web-vitals",
-    "prettier"
+    "eslint:recommended"
   ],
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module"
+  },
   "rules": {
-    "prettier/prettier": "error",
-    "react/react-in-jsx-scope": "off",
-    "@typescript-eslint/no-unused-vars": "warn",
-    "no-console": "warn"
+    "no-unused-vars": "warn",
+    "no-console": "off",
+    "no-undef": "error"
   }
 }

@@ -1,7 +1,8 @@
 import {
   getUser,
   logout,
-  isAuthenticated
+  isAuthenticated,
+  isAdmin
 } from '../services/auth.service.js';
 
 export function initHeader() {
@@ -12,27 +13,17 @@ export function initHeader() {
   const user = getUser();
   if (!user) return;
 
+  const isAdminUser = isAdmin();
+
   const adminLink = document.getElementById('adminLink');
-
-if (adminLink) {
-
   if (adminLink) {
-  const isAdmin =
-    user.rol &&
-    user.rol.toLowerCase() === 'admin';
+    adminLink.style.display = isAdminUser ? 'inline-flex' : 'none';
+  }
 
-  adminLink.style.display =
-    isAdmin ? 'inline-flex' : 'none';
-}
-
-}
-const homeLink = document.getElementById('homeLink');
-
-if (homeLink) {
-
+  const homeLink = document.getElementById('homeLink');
+  if (homeLink) {
     homeLink.style.display = 'inline-flex';
-
-}
+  }
 
   const currentUserEl = document.getElementById('currentUser');
   const btnLogout = document.getElementById('btnLogout');

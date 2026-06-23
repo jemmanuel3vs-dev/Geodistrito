@@ -457,12 +457,39 @@ async function deletePunto(req, res) {
 
 }
 
+
+/* ELIMINAR TODOS LOS PUNTOS */
+async function deleteAllPuntos(req, res) {
+
+  try {
+
+    const [result] = await db.execute(
+      'DELETE FROM puntos'
+    );
+
+    res.json({
+      ok: true,
+      deleted: result.affectedRows,
+      message: 'Registros eliminados'
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    sendError(res, 500, 'Error eliminando registros');
+
+  }
+
+}
 module.exports = {
 
   getPuntos,
   getPuntoById,
   createPunto,
   updatePunto,
-  deletePunto
+  deletePunto,
+  deleteAllPuntos
 
 };
+

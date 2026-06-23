@@ -57,3 +57,6 @@ export async function updatePoint(id, data) {
 export async function deletePoint(id) {
   return await apiDelete(`/puntos/${id}`);
 }
+export async function deleteAllPoints() {
+  return await apiDelete('/puntos/all');
+}

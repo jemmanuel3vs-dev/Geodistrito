@@ -18,9 +18,10 @@
       <a
     id="homeLink"
     href="index.html"
-    class="topbar-link"
+    class="admin-map-link"
 >
-    Ir al mapa
+    <span aria-hidden="true">🗺</span>
+    <span>Ir al mapa</span>
 </a>
       <span id="currentUser" class="user-badge">Invitado</span>
       <button id="btnLogout" class="logout-btn">Cerrar sesión</button>
@@ -55,15 +56,13 @@
     </article>
     <article class="kpi-card metric-comites">
       <div class="kpi-card-top">
-        <span class="kpi-icon">C</span>
-        <span>Comités</span>
+        <span class="kpi-icon">C</span><span>Comités</span>
       </div>
       <strong id="kpiComites">0</strong>
     </article>
     <article class="kpi-card metric-casillas">
       <div class="kpi-card-top">
-        <span class="kpi-icon">S</span>
-        <span>Casillas</span>
+        <span class="kpi-icon">C</span><span>Casillas</span>
       </div>
       <strong id="kpiCasillas">0</strong>
     </article>
@@ -161,6 +160,21 @@
     </div>
   </section>
 
+
+  <section class="admin-danger-section" id="adminDangerSection" hidden>
+    <div class="card panel-card admin-danger-card">
+      <div class="panel-header">
+        <div>
+          <h2>Administración crítica</h2>
+          <p class="text-muted">Acciones irreversibles reservadas para administradores.</p>
+        </div>
+        <button id="btnDeleteAllPoints" type="button" class="admin-danger-button">
+          <span aria-hidden="true">⚠</span>
+          <span>Eliminar todos los registros</span>
+        </button>
+      </div>
+    </div>
+  </section>
   <section class="charts-section dashboard-charts">
     <article class="chart-card">
       <div class="chart-card-header">
@@ -307,3 +321,6 @@
 </div>
 </body>
 </html>
+
+
+

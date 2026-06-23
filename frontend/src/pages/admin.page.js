@@ -20,7 +20,7 @@ import {
 import { eventBus, EVENTS } from "../core/events.js";
 import { importarExcel } from "../modules/import/import.js";
 import { getDashboardStats } from "../services/dashboard.service.js";
-import { deletePoint, getAllPoints, getPointById, updatePoint } from "../services/points.service.js";
+import { deleteAllPoints, deletePoint, getAllPoints, getPointById, updatePoint } from "../services/points.service.js";
 import { showError, showInfo, showSuccess } from "../ui/toast.js";
 
 import {
@@ -60,6 +60,7 @@ export async function initAdminPage() {
   initAdminMap();
   initEditPointModal({ onSave: handleSavePoint });
   initDeleteConfirmModal();
+  initDeleteAllConfirmModal();
   bindAdminEvents();
   reloadAdminData();
 }
@@ -127,6 +128,19 @@ function bindAdminEvents() {
     });
 
     document.getElementById("btnRefreshDashboard")?.addEventListener("click", reloadAdminData);
+
+    const dangerSection = document.getElementById("adminDangerSection");
+    if (dangerSection) {
+        dangerSection.hidden = !isAdmin();
+    }
+
+    document.getElementById("btnDeleteAllPoints")?.addEventListener("click", () => {
+        if (!isAdmin()) {
+            showError("No autorizado");
+            return;
+        }
+        openDeleteAllConfirm();
+    });
 
     document.getElementById("btnExportExcel")?.addEventListener("click", exportToExcel);
     document.getElementById("btnExportCsv")?.addEventListener("click", exportToCsv);
@@ -372,6 +386,121 @@ async function handleDeletePoint(id) {
     });
 }
 
+
+let deleteAllStep = 'intro';
+let isDeletingAll = false;
+
+function initDeleteAllConfirmModal() {
+    const modal = document.createElement('div');
+    modal.id = 'deleteAllConfirmModal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-card delete-modal-card">
+            <h3>¿Deseas eliminar TODOS los registros?</h3>
+            <p class="delete-modal-copy">Esta acción eliminará todos los puntos registrados y no se puede deshacer.</p>
+            <div id="deleteAllSecondStep" hidden>
+                <label for="deleteAllPhrase">Escribe: <strong>ELIMINAR TODO</strong></label>
+                <input id="deleteAllPhrase" class="danger-confirm-input" type="text" autocomplete="off">
+            </div>
+            <div class="modal-actions delete-modal-actions">
+                <button type="button" class="btn-secondary-outline" data-cancel-delete-all>Cancelar</button>
+                <button type="button" class="btn-danger" data-confirm-delete-all>Eliminar</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('[data-cancel-delete-all]').addEventListener('click', closeDeleteAllConfirm);
+    modal.addEventListener('click', event => {
+        if (event.target === modal) closeDeleteAllConfirm();
+    });
+    modal.querySelector('[data-confirm-delete-all]').addEventListener('click', handleDeleteAllConfirmStep);
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeDeleteAllConfirm();
+    });
+}
+
+function openDeleteAllConfirm() {
+    const modal = document.getElementById('deleteAllConfirmModal');
+    const secondStep = document.getElementById('deleteAllSecondStep');
+    const input = document.getElementById('deleteAllPhrase');
+    const confirmButton = modal?.querySelector('[data-confirm-delete-all]');
+
+    if (!modal) return;
+
+    deleteAllStep = 'intro';
+    isDeletingAll = false;
+
+    if (secondStep) secondStep.hidden = true;
+    if (input) input.value = '';
+    if (confirmButton) {
+        confirmButton.disabled = false;
+        confirmButton.textContent = 'Eliminar';
+    }
+
+    modal.classList.add('open');
+}
+
+function closeDeleteAllConfirm() {
+    const modal = document.getElementById('deleteAllConfirmModal');
+    if (modal) modal.classList.remove('open');
+    deleteAllStep = 'intro';
+    isDeletingAll = false;
+}
+
+async function handleDeleteAllConfirmStep() {
+    const modal = document.getElementById('deleteAllConfirmModal');
+    const secondStep = document.getElementById('deleteAllSecondStep');
+    const input = document.getElementById('deleteAllPhrase');
+    const confirmButton = modal?.querySelector('[data-confirm-delete-all]');
+
+    if (deleteAllStep === 'intro') {
+        deleteAllStep = 'phrase';
+        if (secondStep) secondStep.hidden = false;
+        if (confirmButton) confirmButton.textContent = 'Eliminar definitivamente';
+        input?.focus();
+        return;
+    }
+
+    if (input?.value !== 'ELIMINAR TODO') {
+        showError('Debes escribir ELIMINAR TODO exactamente');
+        input?.focus();
+        return;
+    }
+
+    if (isDeletingAll) return;
+
+    try {
+        isDeletingAll = true;
+        if (confirmButton) {
+            confirmButton.disabled = true;
+            confirmButton.textContent = 'Eliminando...';
+        }
+
+        const totalBeforeDelete = adminState.points.length;
+        const response = await deleteAllPoints();
+        const deleted = Number(response.deleted ?? totalBeforeDelete) || 0;
+
+        adminState.points = [];
+        adminState.filteredPoints = [];
+        adminState.currentPage = 1;
+
+        closeDeleteAllConfirm();
+        loadAdminDashboard();
+        applyAdminFilters();
+        showSuccess(`Se eliminaron ${deleted} registros.`);
+    } catch (error) {
+        showError(error.message || 'No se pudieron eliminar los registros');
+    } finally {
+        isDeletingAll = false;
+        if (confirmButton) {
+            confirmButton.disabled = false;
+            confirmButton.textContent = 'Eliminar definitivamente';
+        }
+    }
+}
 function handleViewPoint(id) {
     const point = adminState.points.find(p => Number(p.id) === Number(id));
     if (!point) {
@@ -479,3 +608,5 @@ function initImportModal() {
         }
     });
 }
+
+

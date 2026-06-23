@@ -23,7 +23,8 @@ const {
   getPuntoById,
   createPunto,
   updatePunto,
-  deletePunto
+  deletePunto,
+  deleteAllPuntos
 
 } = require(
   '../controllers/puntos.controller'
@@ -111,6 +112,18 @@ router.put(
 );
 
 /* DELETE */
+
+router.delete(
+
+  '/all',
+
+  verifyToken,
+  requireRole('admin'),
+
+  deleteAllPuntos
+
+);
+
 
 router.delete(
 
@@ -242,3 +255,5 @@ router.get(
 
 module.exports =
 router;
+
+
