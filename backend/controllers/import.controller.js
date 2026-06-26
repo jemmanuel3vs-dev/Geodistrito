@@ -7,6 +7,18 @@ const {
 } = require('../services/geo.service');
 const { safeUnlink } = require('../services/file.service');
 
+let lastGeocodeTime = 0;
+
+async function rateLimitedGeocode(lat, lng) {
+  const now = Date.now();
+  const elapsed = now - lastGeocodeTime;
+  if (elapsed < 1000) {
+    await new Promise(resolve => setTimeout(resolve, 1000 - elapsed));
+  }
+  lastGeocodeTime = Date.now();
+  return await obtenerInformacionGeografica(lat, lng);
+}
+
 async function importExcel(req, res) {
 
   try {
@@ -66,16 +78,9 @@ if (!coords) {
     errores++;
 
     continue;
-}
+    }
 
-await new Promise(resolve =>
-    setTimeout(resolve, 1100)
-);
-
-const geo = await obtenerInformacionGeografica(
-    coords.lat,
-    coords.lng
-);
+    const geo = await rateLimitedGeocode(coords.lat, coords.lng);
 
 if (!geo.distrito || !geo.seccion) {
 
@@ -208,6 +213,18 @@ Errores: ${errores}`,
 
 function extractCoordinates(link) {
 
+  const coordinateMatch =
+    link.match(
+      /[?&]coordinate=(-?\d+\.\d+),(-?\d+\.\d+)/i
+    );
+
+if (coordinateMatch) {
+  return {
+    lat: parseFloat(coordinateMatch[1]),
+    lng: parseFloat(coordinateMatch[2])
+  };
+}
+
   if (!link) return null;
 
   // Formato:
@@ -260,6 +277,22 @@ function extractCoordinates(link) {
 
   match = link.match(
     /[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/
+);
+
+if (match) {
+
+    return {
+
+        lat: parseFloat(match[1]),
+
+        lng: parseFloat(match[2])
+
+    };
+
+}
+
+match = link.match(
+    /[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/
 );
 
 if (match) {

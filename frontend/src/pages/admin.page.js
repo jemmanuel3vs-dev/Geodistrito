@@ -1,4 +1,4 @@
-import { renderAdminDashboard } from "../admin/dashboard.js";
+import { renderAdminDashboard, updateDashboardFromPoints, showDashboardSkeleton } from "../admin/dashboard.js";
 import {
     clearAdminFilters,
     filterAdminPoints,
@@ -13,13 +13,11 @@ import {
     bindSortHeaders,
     bindTableEvents,
     renderPointsTable,
-    renderTableLoading,
     resetSort,
     updatePointRow
 } from "../admin/table.js";
 import { eventBus, EVENTS } from "../core/events.js";
 import { importarExcel } from "../modules/import/import.js";
-import { getDashboardStats } from "../services/dashboard.service.js";
 import { deleteAllPoints, deletePoint, getAllPoints, getPointById, updatePoint } from "../services/points.service.js";
 import { showError, showInfo, showSuccess } from "../ui/toast.js";
 
@@ -62,26 +60,16 @@ export async function initAdminPage() {
   initDeleteConfirmModal();
   initDeleteAllConfirmModal();
   bindAdminEvents();
-  reloadAdminData();
+  loadAdminPoints();
 }
 
 function reloadAdminData() {
-    loadAdminDashboard();
-    loadAdminPoints();
-}
-
-async function loadAdminDashboard() {
-    try {
-        const stats = await getDashboardStats();
-        renderAdminDashboard(stats);
-    } catch (error) {
-        showError(error.message || "No se pudo cargar el dashboard");
-    }
+     loadAdminPoints();
 }
 
 async function loadAdminPoints() {
     try {
-        renderTableLoading();
+        showDashboardSkeleton(true);
 
         const points = await getAllPoints();
         const pointList = Array.isArray(points) ? points : [];
@@ -93,10 +81,19 @@ async function loadAdminPoints() {
         }
 
         applyAdminFilters();
+
+        if (adminState.points.length) {
+            updateDashboardFromPoints(adminState.points);
+        } else {
+            renderAdminDashboard({ total: 0, tipos: {}, distritos: {} }, []);
+        }
+
+        showDashboardSkeleton(false);
     } catch (error) {
         console.error(error);
         showError(error.message || "No se pudieron cargar los puntos");
         renderPointsTable({ rows: [], total: 0, page: 1, totalPages: 1 });
+        showDashboardSkeleton(false);
     }
 }
 
@@ -305,7 +302,7 @@ async function handleSavePoint(id, payload) {
         return updatedPoint;
     });
 
-    loadAdminDashboard();
+    updateDashboardFromPoints(adminState.points);
 
     const stayedVisible =
         previousPoint &&
@@ -350,8 +347,9 @@ function initDeleteConfirmModal() {
         if (event.target === modal) closeDeleteConfirm();
     });
     modal.querySelector('[data-confirm-delete]').addEventListener('click', () => {
+        const callback = deleteConfirmCallback;
         closeDeleteConfirm();
-        if (deleteConfirmCallback) deleteConfirmCallback();
+        if (callback) callback();
     });
 
     document.addEventListener('keydown', (event) => {
@@ -377,7 +375,7 @@ async function handleDeletePoint(id) {
         try {
             await deletePoint(id);
             adminState.points = adminState.points.filter(item => Number(item.id) !== Number(id));
-            loadAdminDashboard();
+            updateDashboardFromPoints(adminState.points);
             applyAdminFilters();
             showSuccess("Punto eliminado correctamente");
         } catch (error) {
@@ -488,7 +486,7 @@ async function handleDeleteAllConfirmStep() {
         adminState.currentPage = 1;
 
         closeDeleteAllConfirm();
-        loadAdminDashboard();
+        updateDashboardFromPoints([]);
         applyAdminFilters();
         showSuccess(`Se eliminaron ${deleted} registros.`);
     } catch (error) {
@@ -501,6 +499,7 @@ async function handleDeleteAllConfirmStep() {
         }
     }
 }
+
 function handleViewPoint(id) {
     const point = adminState.points.find(p => Number(p.id) === Number(id));
     if (!point) {

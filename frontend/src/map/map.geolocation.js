@@ -54,7 +54,7 @@ export async function locateFromLink() {
   const link = input?.value?.trim();
 
   if (!link) {
-    showError('Pega un enlace de Google Maps');
+    showError('Pega un enlace de Google Maps o Apple Maps');
     return;
   }
 
@@ -76,6 +76,16 @@ function extractCoordinatesFromGoogleMapsLink(link) {
     }
 
     match = link.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    }
+
+    match = link.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    }
+
+    match = link.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (match) {
       return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
     }

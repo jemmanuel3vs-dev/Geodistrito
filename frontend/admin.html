@@ -175,24 +175,150 @@
       </div>
     </div>
   </section>
-  <section class="charts-section dashboard-charts">
-    <article class="chart-card">
-      <div class="chart-card-header">
-        <h3>Puntos por tipo</h3>
-      </div>
-      <div class="chart-wrapper">
-        <canvas id="chartByType"></canvas>
-      </div>
-    </article>
-    <article class="chart-card">
-      <div class="chart-card-header">
-        <h3>Distribución por distrito</h3>
-      </div>
-      <div class="chart-wrapper">
-        <canvas id="chartByDistrict"></canvas>
-      </div>
-    </article>
-  </section>
+<section class="charts-section dashboard-charts">
+     <article class="chart-card">
+       <div class="chart-card-header">
+         <h3>Puntos por tipo</h3>
+       </div>
+       <div class="chart-wrapper">
+         <canvas id="chartByType"></canvas>
+       </div>
+     </article>
+     <article class="chart-card">
+       <div class="chart-card-header">
+         <h3>Distribución por distrito</h3>
+       </div>
+       <div class="chart-wrapper">
+         <canvas id="chartByDistrict"></canvas>
+       </div>
+     </article>
+   </section>
+
+   <section class="charts-section dashboard-charts">
+     <article class="chart-card">
+       <div class="chart-card-header">
+         <h3>Distribución por tipo</h3>
+       </div>
+       <div class="chart-wrapper">
+         <canvas id="chartDistribution"></canvas>
+       </div>
+     </article>
+     <article class="chart-card">
+       <div class="chart-card-header">
+         <h3>Top distritos (horizontal)</h3>
+       </div>
+       <div class="chart-wrapper">
+         <canvas id="chartHorizontalDistricts"></canvas>
+       </div>
+     </article>
+   </section>
+
+   <section class="charts-section dashboard-charts">
+     <article class="chart-card">
+       <div class="chart-card-header">
+         <h3>Línea de actividad</h3>
+       </div>
+       <div class="chart-wrapper">
+         <canvas id="chartActivityTimeline"></canvas>
+       </div>
+     </article>
+   </section>
+
+   <section class="stats-tables-section">
+     <div class="panel-row stats-row">
+       <div class="card stat-table-card">
+         <div class="panel-header">
+           <h2>Top 10 Secciones</h2>
+         </div>
+         <div class="table-wrapper stats-table-wrapper">
+           <table>
+             <thead>
+               <tr>
+                 <th>Sección</th>
+                 <th>Cantidad</th>
+                 <th>%</th>
+               </tr>
+             </thead>
+             <tbody id="sectionsTableBody"></tbody>
+           </table>
+         </div>
+       </div>
+       <div class="card stat-table-card">
+         <div class="panel-header">
+           <h2>Top 10 Colonias</h2>
+         </div>
+         <div class="table-wrapper stats-table-wrapper">
+           <table>
+             <thead>
+               <tr>
+                 <th>Colonia</th>
+                 <th>Cantidad</th>
+                 <th>%</th>
+               </tr>
+             </thead>
+             <tbody id="neighborhoodsTableBody"></tbody>
+           </table>
+         </div>
+       </div>
+     </div>
+     <div class="panel-row stats-row">
+       <div class="card stat-table-card">
+         <div class="panel-header">
+           <h2>Municipios</h2>
+         </div>
+         <div class="table-wrapper stats-table-wrapper">
+           <table>
+             <thead>
+               <tr>
+                 <th>Municipio</th>
+                 <th>Cantidad</th>
+                 <th>%</th>
+               </tr>
+             </thead>
+             <tbody id="municipioTableBody"></tbody>
+           </table>
+         </div>
+       </div>
+       <div class="card stat-table-card">
+         <div class="panel-header">
+           <h2>Encargados</h2>
+         </div>
+         <div class="table-wrapper stats-table-wrapper">
+           <table>
+             <thead>
+               <tr>
+                 <th>Encargado</th>
+                 <th>Cantidad</th>
+                 <th>%</th>
+               </tr>
+             </thead>
+             <tbody id="managersTableBody"></tbody>
+           </table>
+         </div>
+       </div>
+     </div>
+   </section>
+
+   <section class="card activity-section">
+     <div class="panel-header">
+       <h2>Actividad reciente</h2>
+       <span class="text-muted">Últimos 10 registros</span>
+     </div>
+     <div class="table-wrapper activity-table-wrapper">
+       <table>
+         <thead>
+           <tr>
+             <th>Fecha</th>
+             <th>Tipo</th>
+             <th>Distrito</th>
+             <th>Sección</th>
+             <th>Colonia</th>
+           </tr>
+         </thead>
+         <tbody id="activityTableBody"></tbody>
+       </table>
+     </div>
+   </section>
 
   <section class="table-section card">
     <div class="table-header">

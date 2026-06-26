@@ -446,3 +446,94 @@ table{
   background:#dc2626;
   color:white;
 }
+
+/* =========================
+   STATISTICS TABLES
+   ========================= */
+.stats-tables-section{
+  margin-top:24px;
+}
+
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:20px;
+  margin-bottom:24px;
+}
+
+.stat-table-card{
+  margin-top:0;
+}
+
+.stats-table-wrapper{
+  max-height:300px;
+  overflow-y:auto;
+}
+
+.stats-table-wrapper table{
+  min-width:unset;
+}
+
+.activity-section{
+  margin-top:24px;
+}
+
+.activity-table-wrapper{
+  max-height:300px;
+  overflow-y:auto;
+}
+
+.activity-table-wrapper table{
+  min-width:unset;
+}
+
+.stat-table-card table,
+.activity-section table{
+  min-width:unset;
+}
+
+/* =========================
+   SKELETON LOADER
+   ========================= */
+.skeleton-loading{
+  pointer-events:none;
+  position:relative;
+}
+
+.skeleton-loading::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,rgba(148,163,184,0.12) 25%,rgba(148,163,184,0.22) 50%,rgba(148,163,184,0.12) 75%);
+  background-size:200% 100%;
+  animation:skeleton-shimmer 1.2s infinite;
+  border-radius:inherit;
+}
+
+@keyframes skeleton-shimmer{
+  0%{background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+
+/* =========================
+   RESPONSIVE ENHANCEMENTS
+   ========================= */
+@media(max-width:1200px){
+  .stats-row{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:768px){
+  .stats-table-wrapper,
+  .activity-table-wrapper{
+    max-height:250px;
+  }
+}
+
+@media(max-width:500px){
+  .chart-wrapper{
+    height:220px;
+    max-height:220px;
+  }
+}

@@ -114,7 +114,7 @@ async function reverseGeocode(lat, lng) {
 
         address.path ??
 
-        null,
+        "Not available",
 
       colonia:
 
@@ -128,7 +128,7 @@ async function reverseGeocode(lat, lng) {
 
         address.hamlet ??
 
-        null,
+        "Not available",
 
       municipio:
 
